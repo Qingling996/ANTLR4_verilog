@@ -257,8 +257,17 @@ parameter_type
     ;
 
 // 基础类型（标准第4章）
-integer_type: 'integer' | 'int';
-real_type: 'real';
+integer_type
+    : INTEGER       // Verilog标准类型
+    | REG           // Verilog寄存器类型
+    | INT           // SystemVerilog短整型
+    | SHORTINT      // SystemVerilog短整型
+    | LONGINT       // SystemVerilog长整型
+    | BYTE          // SystemVerilog字节类型
+    | BIT           // SystemVerilog二进制类型
+    | LOGIC         // SystemVerilog四态逻辑
+    ;
+real_type : REAL | REALTIME;
 realtime_type: 'realtime';
 time_type: 'time';
 signed_type: 'signed';
@@ -466,7 +475,7 @@ ordered_parameter_assignment
     ;
 
 named_parameter_assignment
-    : '.' parameter_identifier '(' ( expression )? ')'
+    : DOT parameter_identifier LPAREN expression? RPAREN
     ;
 
 module_instance
@@ -552,7 +561,11 @@ hierarchical_variable_identifier
     ;
 
 hierarchical_identifier
-    : ( identifier ( bit_select )? DOT )* identifier ( bit_select )?
+    : (identifier constant_bit_select? '.')* identifier constant_bit_select?
+    ;
+
+constant_bit_select
+    : '[' constant_expression ']'
     ;
 
 bit_select
@@ -629,7 +642,21 @@ delay_or_event_control
     ;
 
 delay_control
-    : HASH delay_value
+    : '#' delay_value
+    | '#' LPAREN mintypmax_expression RPAREN
+    | ARROW delay_value
+    | ARROW_ARROW delay_value
+    ;
+
+gate_instantiation
+    : gate_type (drive_strength)? (delay3)? gate_instance (COMMA gate_instance)* SEMI
+    ;
+
+delay3
+    : '#' delay_value
+    | '#' LPAREN mintypmax_expression (COMMA mintypmax_expression (COMMA mintypmax_expression)?)? RPAREN
+    | ARROW delay_value
+    | ARROW_ARROW LPAREN delay_value COMMA delay_value RPAREN
     ;
 
 event_control
@@ -699,18 +726,27 @@ binary_operator
 
 constant_primary
     : number
-    | parameter_identifier
+    | parameter_identifier ( '[' constant_range_expression ']' )?
     | constant_concatenation
     | constant_function_call
+    | '(' constant_expression ')'
+    | system_constant
+    ;
+
+constant_range_expression
+    : constant_expression
+    | constant_expression ':' constant_expression
+    | constant_expression '+:' constant_expression
+    | constant_expression '-:' constant_expression
     ;
 
 constant_concatenation
-    : LBRACE constant_expression ( COMMA constant_expression )* RBRACE
-    | LBRACE constant_multi_concatenation RBRACE
+    : '{' constant_expression ( ',' constant_expression )* '}'
+    | '{' constant_multi_concatenation '}'
     ;
 
 constant_multi_concatenation
-    : LBRACE constant_expression constant_concatenation RBRACE
+    : constant_expression '{' constant_expression ( ',' constant_expression )* '}'
     ;
 
 constant_function_call
@@ -722,6 +758,10 @@ function_identifier
     : hierarchical_identifier
     ;
 
+system_constant
+    : '`' identifier
+    | '\''{ '0' | '1' | 'x' | 'z' | 'X' | 'Z' }
+    ;
 /* ================================================================================================  */
 /*                                             Expression                                            */
 /* ================================================================================================  */
@@ -807,11 +847,6 @@ hierarchical_net_identifier
 /* ================================================================================================  */
 /*                                    IEEE 1364-2005 第7章 门级建模                                   */
 /* ================================================================================================  */
-
-gate_instantiation
-    : gate_type ( drive_strength )? ( delay )? gate_instance ( COMMA gate_instance )* SEMI
-    ;
-
 gate_instance
     : ( name_of_gate_instance )? LPAREN terminal ( COMMA terminal )* RPAREN
     ;
@@ -906,37 +941,104 @@ case_item
 
 wait_statement  : WAIT LPAREN expression RPAREN statement_or_null ;
 event_trigger   : ( ARROW | ARROW_ARROW ) hierarchical_event_identifier ;
-disable_statement : DISABLE ( hierarchical_task_identifier | hierarchical_block_identifier ) ;
 
-seq_block : BEGIN ( COLON identifier )? ( block_item_declaration )* ( statement )* END ;
-par_block : FORK ( COLON identifier )? ( block_item_declaration )* ( statement )* JOIN ;
+hierarchical_task_identifier
+    : hierarchical_identifier
+    ;
+
+hierarchical_block_identifier
+    : hierarchical_identifier
+    ;
+seq_block
+    : BEGIN ( COLON identifier )? 
+      block_item_declaration* 
+      statement* 
+    END
+    ;
+
+par_block
+    : FORK ( COLON identifier )?
+      block_item_declaration*
+      statement*
+    JOIN
+    ;
+
+block_item_declaration
+    : parameter_declaration
+    | reg_declaration
+    | integer_declaration
+    | real_declaration
+    | time_declaration
+    | event_declaration
+    | local_parameter_declaration
+    ;
 
 task_enable : hierarchical_task_identifier ( LPAREN ( expression ( COMMA expression )* )? RPAREN )? ;
-system_task_enable : system_task_identifier ( LPAREN ( expression ( COMMA expression )* )? RPAREN )? ;
+system_task_enable
+    : system_task_identifier ( LPAREN task_arg_list? RPAREN )? SEMI
+    ;
+
+system_task_identifier
+    : DOLLAR identifier
+    ;
+
+task_arg_list
+    : expression ( COMMA expression )*
+    | named_parameter_assignment ( COMMA named_parameter_assignment )*
+    ;
 
 /* ================================================================================================  */
 /*                                  IEEE 1364-2005 第10章 任务和函数                                  */
 /* ================================================================================================  */
 
 task_declaration
-    : TASK ( lifetime )? task_identifier SEMI
-      ( tf_declaration )*
-      ( statement_or_null )*
+    : TASK lifetime? task_identifier SEMI
+      tf_port_declaration*
+      task_item_declaration*
+      statement_or_null*
       ENDTASK
     ;
 
+lifetime
+    : STATIC
+    | AUTOMATIC
+    ;
+
+task_identifier
+    : identifier
+    ;
+
+tf_port_declaration
+    : port_direction range? list_of_port_identifiers SEMI
+    ;
+
+task_item_declaration
+    : block_item_declaration
+    | tf_port_declaration
+    ;
+
 function_declaration
-    : FUNCTION ( lifetime )? ( function_range )? function_identifier SEMI
-      ( tf_declaration )*
-      ( statement_or_null )*
+    : FUNCTION lifetime? function_data_type? function_identifier SEMI
+      function_item_declaration*
+      statement_or_null*
       ENDFUNCTION
     ;
 
-function_range
-    : range
+function_data_type
+    : integer_type
+    | real_type
+    | range              // 位宽声明
     ;
 
-/* IEEE 1364-2005 第11章 禁用 */
+function_item_declaration
+    : block_item_declaration
+    | tf_port_declaration
+    ;
+
+/* ================================================================================================  */
+/*                                     IEEE 1364-2005 第11章 禁用                                     */
+/* ================================================================================================  */
+
 disable_statement
     : DISABLE hierarchical_task_identifier SEMI
     | DISABLE hierarchical_block_identifier SEMI
@@ -960,7 +1062,10 @@ fragment ESCAPED_IDENTIFIER
     : '\\' ~[ \r\n\t]+
     ;
 
-/* IEEE 1364-2005 第14章 指定块 */
+/* ================================================================================================  */
+/*                                    IEEE 1364-2005 第14章 指定块                                    */
+/* ================================================================================================  */
+
 specify_block
     : SPECIFY
       ( specify_item )*
@@ -971,38 +1076,286 @@ specify_item
     : specparam_declaration
     | path_declaration
     | system_timing_check
+    | state_dependent_path_declaration  
+    | polarity_operator_declaration    
     ;
+
+specparam_declaration
+    : SPECPARAM list_of_specparam_assignments SEMI
+    ;
+
+path_declaration
+    : simple_path_declaration
+    | edge_sensitive_path_declaration
+    | state_dependent_path_declaration
+    ;
+
+system_timing_check
+    : '$setup' timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | '$hold' timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | '$width' timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | '$recovery' timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | '$skew' timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    ;
+
+timing_check_event
+    : (edge_control)? module_path_expression ('&&&' timing_check_condition)?
+    ;
+
+edge_control
+    : POSEDGE | NEGEDGE
+    ;
+
+module_path_expression
+    : module_path_primary
+    | unary_module_path_operator module_path_primary
+    | module_path_expression binary_module_path_operator module_path_expression
+    ;
+
+module_path_primary
+    : number
+    | identifier
+    | '(' module_path_expression ')'
+    ;
+
+unary_module_path_operator
+    : '!' | '~' | '&' | '~&' | '|' | '~|' | '^' | '~^' | '^~'
+    ;
+
+binary_module_path_operator
+    : '==' | '!=' | '&&' | '||' 
+    | '&' | '|' | '^' | '^~' | '~^'
+    | '>>' | '<<' | '>>>' | '<<<'
+    | '+' | '-' | '*' | '/' | '%'
+    ;
+
+timing_check_condition
+    : simple_expression
+    | '~' simple_expression
+    ;
+
+simple_expression
+    : identifier
+    | '(' expression ')'
+    ;
+
+timing_check_limit
+    : constant_expression
+    | constant_mintypmax_expression
+    ;
+
+constant_mintypmax_expression
+    : constant_expression ( ':' constant_expression ':' constant_expression )?
+    ;
+
+notifier_control
+    : identifier
+    | hierarchical_identifier
+    ;
+
+list_of_specparam_assignments
+    : specparam_assignment (COMMA specparam_assignment)*
+    ;
+
+specparam_assignment
+    : identifier '=' constant_expression
+    | identifier '=' constant_mintypmax_expression
+    ;
+
+/* ================================================================================================  */
+/*                                      simple_path_declaration                                      */
+/* ================================================================================================  */
+
+simple_path_declaration
+    : parallel_path_description '=' path_delay_value
+    | full_path_description '=' path_delay_value
+    ;
+
+parallel_path_description
+    : '(' specify_input_terminal_descriptor ( polarity_operator )? '=>' 
+      specify_output_terminal_descriptor ')'
+    ;
+
+full_path_description
+    : '(' list_of_path_inputs ( polarity_operator )? '*>' list_of_path_outputs ')'
+    ;
+
+path_delay_value
+    : list_of_path_delay_expressions
+    | '(' list_of_path_delay_expressions ')'
+    ;
+
+specify_input_terminal_descriptor
+    : input_identifier ( '[' constant_range_expression ']' )?
+    ;
+
+specify_output_terminal_descriptor
+    : output_identifier ( '[' constant_range_expression ']' )?
+    ;
+
+input_identifier
+    : identifier
+    | hierarchical_identifier
+    ;
+
+output_identifier
+    : identifier
+    | hierarchical_identifier
+    ;
+
+list_of_path_inputs
+    : specify_input_terminal_descriptor ( ',' specify_input_terminal_descriptor )*
+    ;
+
+list_of_path_outputs
+    : specify_output_terminal_descriptor ( ',' specify_output_terminal_descriptor )*
+    ;
+
+list_of_path_delay_expressions
+    : path_delay_expression ( ',' path_delay_expression )*
+    ;
+
+path_delay_expression
+    : constant_mintypmax_expression
+    ;
+
+polarity_operator
+    : '+'
+    | '-'
+    ;
+
+/* ================================================================================================  */
+/*                                  edge_sensitive_path_declaration                                  */
+/* ================================================================================================  */
+
+edge_sensitive_path_declaration
+    : 'if' '(' conditional_port_expression ')' path_description '=' path_delay_value
+    | 'ifnone' path_description '=' path_delay_value
+    ;
+
+conditional_port_expression
+    : port_expression
+    | '!' port_expression
+    | port_expression '==' scalar_constant
+    | port_expression '===' scalar_constant
+    ;
+
+path_description
+    : parallel_edge_sensitive_path_description
+    | full_edge_sensitive_path_description
+    ;
+
+parallel_edge_sensitive_path_description
+    : '(' edge_identifier? specify_input_terminal_descriptor '=>' 
+      '(' specify_output_terminal_descriptor polarity_operator? ':' data_source_expression ')' ')'
+    ;
+
+full_edge_sensitive_path_description
+    : '(' edge_identifier? list_of_path_inputs '*>' 
+      '(' list_of_path_outputs polarity_operator? ':' data_source_expression ')' ')'
+    ;
+
+edge_identifier
+    : 'posedge'
+    | 'negedge'
+    ;
+
+data_source_expression
+    : port_expression
+    ;
+
+scalar_constant
+    : '1\'b0' | '1\'b1'
+    | '1\'B0' | '1\'B1'
+    | '\'0' | '\'1'
+    ;
+
+/* ================================================================================================  */
+/*                                  state_dependent_path_declaration                                 */
+/* ================================================================================================  */
+
+state_dependent_path_declaration
+    : 'if' '(' module_path_expression ')' simple_path_declaration
+    | 'if' '(' module_path_expression ')' edge_sensitive_path_declaration
+    | 'ifnone' simple_path_declaration
+    ;
+
+polarity_operator_declaration
+    : POSEDGE path_description '=' path_delay_value
+    | NEGEDGE path_description '=' path_delay_value
+    ;
+
+/* ================================================================================================  */
+/*                                          net_declaration                                          */
+/* ================================================================================================  */
 
 net_declaration
-    : net_type ( drive_strength )? ( VECTORED | SCALAR )? ( SIGNED )? 
-      ( delay )? list_of_net_identifiers SEMI
-    | net_type ( drive_strength )? ( SIGNED )? ( delay )? 
-      list_of_net_decl_assignments SEMI
+    : net_type ( drive_strength )? 
+      ( 'vectored' | 'scalared' )?
+      ( 'signed' )?
+      ( delay )?
+      list_of_net_identifiers ';'
+    | net_type ( drive_strength )?
+      ( 'signed' )?
+      ( delay )?
+      list_of_net_decl_assignments ';'
     ;
 
+list_of_net_identifiers
+    : net_identifier ( ',' net_identifier )*
+    ;
+
+net_identifier
+    : identifier ( range )?
+    ;
+
+list_of_net_decl_assignments
+    : net_decl_assignment ( ',' net_decl_assignment )*
+    ;
+
+net_decl_assignment
+    : identifier ( range )? '=' expression
+    ;
+
+/* ================================================================================================  */
+/*                                              变量声明                                              */
+/* ================================================================================================  */
+
 reg_declaration
-    : REG ( range )? list_of_variable_identifiers SEMI
+    : 'reg' ( range )? list_of_variable_identifiers ';'
     ;
 
 integer_declaration
-    : INTEGER list_of_variable_identifiers SEMI
+    : 'integer' list_of_variable_identifiers ';'
     ;
 
 real_declaration
-    : REAL list_of_real_identifiers SEMI
+    : 'real' list_of_real_identifiers ';'
     ;
 
 time_declaration
-    : TIME list_of_variable_identifiers SEMI
+    : 'time' list_of_variable_identifiers ';'
     ;
 
-// 属性和实例（IEEE 1364-2005 第12.1.3节）
-attribute_instance
-    : LPAREN STAR attr_spec ( COMMA attr_spec )* STAR RPAREN
+realtime_declaration
+    : 'realtime' list_of_real_identifiers ';'
     ;
 
-attr_spec
-    : attr_name ( ASSIGN_EQ constant_expression )?
+// 共用子规则
+list_of_variable_identifiers
+    : variable_identifier ( ',' variable_identifier )*
+    ;
+
+list_of_real_identifiers
+    : real_identifier ( ',' real_identifier )*
+    ;
+
+variable_identifier
+    : identifier ( range )?
+    ;
+
+real_identifier
+    : identifier
     ;
 
 // 标识符系统（IEEE 1364-2005 第3.9节）
@@ -1022,10 +1375,6 @@ SIMPLE_IDENTIFIER
     ;
 
 port_identifier
-    : identifier
-    ;
-
-net_identifier
     : identifier
     ;
 

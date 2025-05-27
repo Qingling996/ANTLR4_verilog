@@ -7,6 +7,7 @@ channels { COMMENTS }
 ALWAYS          : 'always';
 AND             : 'and';
 ASSIGN          : 'assign';
+AUTOMATIC       : 'automatic';
 BUF             : 'buf';
 BUFIF0          : 'bufif0';
 BUFIF1          : 'bufif1';
@@ -80,9 +81,11 @@ RTRAN           : 'rtran';
 RTRANIF0        : 'rtranif0';
 RTRANIF1        : 'rtranif1';
 SCALARED        : 'scalared';
+SIGNED          : 'signed';
 SMALL           : 'small';
 SPECIFY         : 'specify';
 SPECPARAM       : 'specparam';
+STATIC          : 'static';
 STRONG0         : 'strong0';
 STRONG1         : 'strong1';
 SUPPLY0         : 'supply0';
@@ -99,6 +102,7 @@ TRI1            : 'tri1';
 TRIAND          : 'triand';
 TRIOR           : 'trior';
 TRIREG          : 'trireg';
+UNSIGNED        : 'unsigned';
 VECTORED        : 'vectored';
 WAIT            : 'wait';
 WAND            : 'wand';
@@ -116,6 +120,13 @@ INSTANCE        : 'instance';
 LIBLIST         : 'liblist';
 USE             : 'use';
 
+// system verilog
+INT             : 'int';
+SHORTINT        : 'shortint';
+LONGINT         : 'longint';
+BYTE            : 'byte';
+BIT             : 'bit';
+LOGIC           : 'logic';
 // 数字常量（IEEE 1364-2005 第2.5节）
 NUMBER
     : DECIMAL_NUMBER
@@ -217,6 +228,17 @@ LBRACK          : '[';
 RBRACK          : ']';
 LBRACE          : '{';
 RBRACE          : '}';
+
+// 门级原语延迟符号
+ARROW           : '->';
+ARROW_ARROW     : '->>';
+
+// 相关保留字（如有需要）
+PULSE           : 'pulse';
+FULLSKEW        : 'fullskew';
+
+EDGE_IDENTIFIER : 'posedge' | 'negedge';
+POLARITY_OP     : '+' | '-';
 
 // 基础空白和注释
 WS              : [ \t\r\n]+ -> channel(HIDDEN);
