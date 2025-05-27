@@ -535,11 +535,11 @@ attr_name
 /*                                赋值语句（IEEE 1364-2005 第9.2节）                                  */
 /* ================================================================================================  */
 blocking_assignment
-    : variable_lvalue ASSIGN_EQ ( delay_or_event_control )? expression
+    : variable_lvalue ASSIGN_EQ ( delay_or_event_control )? expression SEMI
     ;
 
 non_blocking_assignment
-    : variable_lvalue ASSIGN_LE ( delay_or_event_control )? expression
+    : variable_lvalue ASSIGN_LE ( delay_or_event_control )? expression SEMI
     ;
 
 variable_lvalue
