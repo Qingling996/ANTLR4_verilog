@@ -1,5 +1,23 @@
 lexer grammar VerilogLexer;
 
+@lexer::members {
+    boolean isInAssignContext() {
+        // 获取当前已识别的文本并移除所有空白
+        String prevText = getText().replaceAll("\\s+", "");
+        // 检查是否以 = 或 < 结尾（赋值或比较上下文）
+        return prevText.endsWith("=") || prevText.endsWith("<");
+    }
+    
+    boolean isNonBlockingAssign() {
+        // 获取当前已识别的文本并移除所有空白
+        String prevText = getText().replaceAll("\\s+", "");
+        // 非阻塞赋值判断条件：
+        // 1. 必须以 <= 结尾
+        // 2. 不在条件语句上下文中（if/while/for）
+        return prevText.endsWith("<=") && 
+              !prevText.matches(".*\\b(if|while|for)\\b.*");
+    }
+}
 
 channels { COMMENTS }
 
@@ -190,7 +208,7 @@ DIV             : '/';
 MOD             : '%';
 LOG_AND         : '&&';
 LOG_OR          : '||';
-LOG_NOT         : '!' ;
+LOG_NOT         : '!' { _input.LA(1) != '=' }?; // 确保不是 != 的情况
 LOG_EQ          : '==';
 LOG_NEQ         : '!=';
 CASE_EQ         : '===';
@@ -211,8 +229,8 @@ LESS_EQ         : '<=';
 GREATER         : '>';
 GREATER_EQ      : '>=';
 ASSIGN_EQ       : '=';
-ASSIGN_LE       : '<=';
-ASSIGN_NB       : '<=';
+ASSIGN_LE: '<=' { !isInAssignContext() }?; // 需要上下文判断
+ASSIGN_NB: '<=' { isNonBlockingAssign() }?; // 需要上下文判断
 TICK            : '`';
 AT              : '@';
 HASH            : '#';
@@ -237,7 +255,6 @@ ARROW_ARROW     : '->>';
 PULSE           : 'pulse';
 FULLSKEW        : 'fullskew';
 
-EDGE_IDENTIFIER : 'posedge' | 'negedge';
 POLARITY_OP     : '+' | '-';
 
 // 基础空白和注释
