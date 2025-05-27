@@ -200,13 +200,9 @@ cell_identifier: identifier;
 //===============================================================//
 // 参数声明部分（保持原有简洁格式）
 parameter_declaration
-    : ('parameter' | 'localparam') 
-      ( signed )? ( range )? 
+    : (PARAMETER | LOCALPARAM) 
+      ( SIGNED )? ( range )? 
       list_of_param_assignments SEMI
-    ;
-
-signed
-    : 'signed'  // 显式声明有符号数
     ;
 
 // 参数覆盖部分（使用完整格式）
@@ -242,7 +238,7 @@ parameter_port_list
     ;
 
 local_parameter_declaration
-    : 'localparam' ( parameter_type list_of_param_assignments
+    : LOCALPARAM ( parameter_type list_of_param_assignments
                    | list_of_param_assignments )
     ;
 
@@ -268,10 +264,10 @@ integer_type
     | LOGIC         // SystemVerilog四态逻辑
     ;
 real_type : REAL | REALTIME;
-realtime_type: 'realtime';
-time_type: 'time';
-signed_type: 'signed';
-unsigned_type: 'unsigned';
+realtime_type: REALTIME;
+time_type: TIME;
+signed_type: SIGNED;
+unsigned_type: UNSIGNED;
 
 type_identifier
     : identifier  // 用户定义类型名
@@ -313,7 +309,7 @@ port_declaration
 
 port_type
     : net_type
-    | 'reg' ( range )?
+    | REG ( range )?
     ;
 
 range
@@ -462,7 +458,7 @@ module_instantiation
     ;
 
 parameter_value_assignment
-    : '#' '(' list_of_parameter_assignments ')'
+    : HASH LPAREN list_of_parameter_assignments RPAREN
     ;
 
 list_of_parameter_assignments
@@ -479,7 +475,7 @@ named_parameter_assignment
     ;
 
 module_instance
-    : name_of_instance '(' list_of_port_connections ')'
+    : name_of_instance LPAREN list_of_port_connections RPAREN
     ;
 
 name_of_instance
@@ -503,7 +499,7 @@ named_port_connection
 /*                                         event_declaration                                         */
 /* ================================================================================================  */
 event_declaration
-    : 'event' list_of_event_identifiers SEMI
+    : EVENT list_of_event_identifiers SEMI
     ;
 
 list_of_event_identifiers
@@ -561,11 +557,11 @@ hierarchical_variable_identifier
     ;
 
 hierarchical_identifier
-    : (identifier constant_bit_select? '.')* identifier constant_bit_select?
+    : (identifier constant_bit_select? DOT)* identifier constant_bit_select?
     ;
 
 constant_bit_select
-    : '[' constant_expression ']'
+    : LBRACK constant_expression RBRACK
     ;
 
 bit_select
@@ -642,8 +638,8 @@ delay_or_event_control
     ;
 
 delay_control
-    : '#' delay_value
-    | '#' LPAREN mintypmax_expression RPAREN
+    : HASH delay_value
+    | HASH LPAREN mintypmax_expression RPAREN
     | ARROW delay_value
     | ARROW_ARROW delay_value
     ;
@@ -653,8 +649,8 @@ gate_instantiation
     ;
 
 delay3
-    : '#' delay_value
-    | '#' LPAREN mintypmax_expression (COMMA mintypmax_expression (COMMA mintypmax_expression)?)? RPAREN
+    : HASH delay_value
+    | HASH LPAREN mintypmax_expression (COMMA mintypmax_expression (COMMA mintypmax_expression)?)? RPAREN
     | ARROW delay_value
     | ARROW_ARROW LPAREN delay_value COMMA delay_value RPAREN
     ;
@@ -726,27 +722,27 @@ binary_operator
 
 constant_primary
     : number
-    | parameter_identifier ( '[' constant_range_expression ']' )?
+    | parameter_identifier ( LBRACK constant_range_expression RBRACK )?
     | constant_concatenation
     | constant_function_call
-    | '(' constant_expression ')'
+    | LPAREN constant_expression RPAREN
     | system_constant
     ;
 
 constant_range_expression
     : constant_expression
-    | constant_expression ':' constant_expression
-    | constant_expression '+:' constant_expression
-    | constant_expression '-:' constant_expression
+    | constant_expression COLON constant_expression
+    | constant_expression PLUS_COLON constant_expression
+    | constant_expression MINUS_COLON constant_expression
     ;
 
 constant_concatenation
-    : '{' constant_expression ( ',' constant_expression )* '}'
-    | '{' constant_multi_concatenation '}'
+    : LBRACE constant_expression ( COMMA constant_expression )* RBRACE
+    | LBRACE constant_multi_concatenation RBRACE
     ;
 
 constant_multi_concatenation
-    : constant_expression '{' constant_expression ( ',' constant_expression )* '}'
+    : constant_expression LBRACE constant_expression ( COMMA constant_expression )* RBRACE
     ;
 
 constant_function_call
@@ -759,8 +755,8 @@ function_identifier
     ;
 
 system_constant
-    : '`' identifier
-    | '\''{ '0' | '1' | 'x' | 'z' | 'X' | 'Z' }
+    : TICK identifier
+    SINGLE_QUOTE BINARY_VALUE
     ;
 /* ================================================================================================  */
 /*                                             Expression                                            */
@@ -1049,19 +1045,6 @@ number
     : NUMBER
     ;
 
-string
-    : STRING
-    ;
-
-// 词法片段补充
-fragment STRING
-    : '"' .*? '"'
-    ;
-
-fragment ESCAPED_IDENTIFIER
-    : '\\' ~[ \r\n\t]+
-    ;
-
 /* ================================================================================================  */
 /*                                    IEEE 1364-2005 第14章 指定块                                    */
 /* ================================================================================================  */
@@ -1091,15 +1074,15 @@ path_declaration
     ;
 
 system_timing_check
-    : '$setup' timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
-    | '$hold' timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
-    | '$width' timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
-    | '$recovery' timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
-    | '$skew' timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    : DOLLAR_SETUP timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | DOLLAR_HOLD timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | DOLLAR_WIDTH timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | DOLLAR_RECOVERY timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | DOLLAR_SKEW timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
     ;
 
 timing_check_event
-    : (edge_control)? module_path_expression ('&&&' timing_check_condition)?
+    : (edge_control)? module_path_expression (AND3 timing_check_condition)?
     ;
 
 edge_control
@@ -1115,28 +1098,28 @@ module_path_expression
 module_path_primary
     : number
     | identifier
-    | '(' module_path_expression ')'
+    | LPAREN module_path_expression RPAREN
     ;
 
 unary_module_path_operator
-    : '!' | '~' | '&' | '~&' | '|' | '~|' | '^' | '~^' | '^~'
+    : LOG_NOT | BIT_NOT | BIT_AND | REDUCE_NAND | BIT_OR | REDUCE_NOR | BIT_XOR | BIT_XNOR
     ;
 
 binary_module_path_operator
-    : '==' | '!=' | '&&' | '||' 
-    | '&' | '|' | '^' | '^~' | '~^'
-    | '>>' | '<<' | '>>>' | '<<<'
-    | '+' | '-' | '*' | '/' | '%'
+    : LOG_EQ | LOG_NEQ | LOG_AND | LOG_OR 
+    | BIT_AND | BIT_OR | BIT_XOR | BIT_XNOR
+    | RIGHT_SHIFT | LEFT_SHIFT | SHRA | SHLA
+    | PLUS | MINUS | STAR | DIV | MOD
     ;
 
 timing_check_condition
     : simple_expression
-    | '~' simple_expression
+    | BIT_NOT simple_expression
     ;
 
 simple_expression
     : identifier
-    | '(' expression ')'
+    | LPAREN expression RPAREN
     ;
 
 timing_check_limit
@@ -1145,7 +1128,7 @@ timing_check_limit
     ;
 
 constant_mintypmax_expression
-    : constant_expression ( ':' constant_expression ':' constant_expression )?
+    : constant_expression ( COLON constant_expression COLON constant_expression )?
     ;
 
 notifier_control
@@ -1158,8 +1141,8 @@ list_of_specparam_assignments
     ;
 
 specparam_assignment
-    : identifier '=' constant_expression
-    | identifier '=' constant_mintypmax_expression
+    : identifier ASSIGN_EQ constant_expression
+    | identifier ASSIGN_EQ constant_mintypmax_expression
     ;
 
 /* ================================================================================================  */
@@ -1167,30 +1150,30 @@ specparam_assignment
 /* ================================================================================================  */
 
 simple_path_declaration
-    : parallel_path_description '=' path_delay_value
-    | full_path_description '=' path_delay_value
+    : parallel_path_description ASSIGN_EQ path_delay_value
+    | full_path_description ASSIGN_EQ path_delay_value
     ;
 
 parallel_path_description
-    : '(' specify_input_terminal_descriptor ( polarity_operator )? '=>' 
-      specify_output_terminal_descriptor ')'
+    : LPAREN specify_input_terminal_descriptor ( polarity_operator )? IMPLIES 
+      specify_output_terminal_descriptor RPAREN
     ;
 
 full_path_description
-    : '(' list_of_path_inputs ( polarity_operator )? '*>' list_of_path_outputs ')'
+    : LPAREN list_of_path_inputs ( polarity_operator )? STAR_GT list_of_path_outputs RPAREN
     ;
 
 path_delay_value
     : list_of_path_delay_expressions
-    | '(' list_of_path_delay_expressions ')'
+    | LPAREN list_of_path_delay_expressions RPAREN
     ;
 
 specify_input_terminal_descriptor
-    : input_identifier ( '[' constant_range_expression ']' )?
+    : input_identifier ( LBRACK constant_range_expression RBRACK )?
     ;
 
 specify_output_terminal_descriptor
-    : output_identifier ( '[' constant_range_expression ']' )?
+    : output_identifier ( LBRACK constant_range_expression RBRACK )?
     ;
 
 input_identifier
@@ -1204,15 +1187,15 @@ output_identifier
     ;
 
 list_of_path_inputs
-    : specify_input_terminal_descriptor ( ',' specify_input_terminal_descriptor )*
+    : specify_input_terminal_descriptor ( COMMA specify_input_terminal_descriptor )*
     ;
 
 list_of_path_outputs
-    : specify_output_terminal_descriptor ( ',' specify_output_terminal_descriptor )*
+    : specify_output_terminal_descriptor ( COMMA specify_output_terminal_descriptor )*
     ;
 
 list_of_path_delay_expressions
-    : path_delay_expression ( ',' path_delay_expression )*
+    : path_delay_expression ( COMMA path_delay_expression )*
     ;
 
 path_delay_expression
@@ -1220,8 +1203,8 @@ path_delay_expression
     ;
 
 polarity_operator
-    : '+'
-    | '-'
+    : PLUS
+    | MINUS
     ;
 
 /* ================================================================================================  */
@@ -1229,15 +1212,15 @@ polarity_operator
 /* ================================================================================================  */
 
 edge_sensitive_path_declaration
-    : 'if' '(' conditional_port_expression ')' path_description '=' path_delay_value
-    | 'ifnone' path_description '=' path_delay_value
+    : IF LPAREN conditional_port_expression RPAREN path_description ASSIGN_EQ path_delay_value
+    | IFNONE path_description ASSIGN_EQ path_delay_value
     ;
 
 conditional_port_expression
     : port_expression
-    | '!' port_expression
-    | port_expression '==' scalar_constant
-    | port_expression '===' scalar_constant
+    | LOG_NOT port_expression
+    | port_expression LOG_EQ scalar_constant
+    | port_expression CASE_EQ scalar_constant
     ;
 
 path_description
@@ -1246,18 +1229,18 @@ path_description
     ;
 
 parallel_edge_sensitive_path_description
-    : '(' edge_identifier? specify_input_terminal_descriptor '=>' 
-      '(' specify_output_terminal_descriptor polarity_operator? ':' data_source_expression ')' ')'
+    : LPAREN edge_identifier? specify_input_terminal_descriptor IMPLIES 
+      LPAREN specify_output_terminal_descriptor polarity_operator? COLON data_source_expression RPAREN RPAREN
     ;
 
 full_edge_sensitive_path_description
-    : '(' edge_identifier? list_of_path_inputs '*>' 
-      '(' list_of_path_outputs polarity_operator? ':' data_source_expression ')' ')'
+    : LPAREN edge_identifier? list_of_path_inputs STAR_GT 
+      LPAREN list_of_path_outputs polarity_operator? COLON data_source_expression RPAREN RPAREN
     ;
 
 edge_identifier
-    : 'posedge'
-    | 'negedge'
+    : POSEDGE
+    | NEGEDGE
     ;
 
 data_source_expression
@@ -1265,9 +1248,8 @@ data_source_expression
     ;
 
 scalar_constant
-    : '1\'b0' | '1\'b1'
-    | '1\'B0' | '1\'B1'
-    | '\'0' | '\'1'
+    : SCALAR_CONSTANT
+    | BINARY_CONSTANT
     ;
 
 /* ================================================================================================  */
@@ -1275,14 +1257,14 @@ scalar_constant
 /* ================================================================================================  */
 
 state_dependent_path_declaration
-    : 'if' '(' module_path_expression ')' simple_path_declaration
-    | 'if' '(' module_path_expression ')' edge_sensitive_path_declaration
-    | 'ifnone' simple_path_declaration
+    : IF LPAREN module_path_expression RPAREN simple_path_declaration
+    | IF LPAREN module_path_expression RPAREN edge_sensitive_path_declaration
+    | IFNONE simple_path_declaration
     ;
 
 polarity_operator_declaration
-    : POSEDGE path_description '=' path_delay_value
-    | NEGEDGE path_description '=' path_delay_value
+    : POSEDGE path_description ASSIGN_EQ path_delay_value
+    | NEGEDGE path_description ASSIGN_EQ path_delay_value
     ;
 
 /* ================================================================================================  */
@@ -1291,18 +1273,18 @@ polarity_operator_declaration
 
 net_declaration
     : net_type ( drive_strength )? 
-      ( 'vectored' | 'scalared' )?
-      ( 'signed' )?
+      ( VECTORED | SCALARED )?
+      ( SIGNED )?
       ( delay )?
-      list_of_net_identifiers ';'
+      list_of_net_identifiers SEMI
     | net_type ( drive_strength )?
-      ( 'signed' )?
+      ( SIGNED )?
       ( delay )?
-      list_of_net_decl_assignments ';'
+      list_of_net_decl_assignments SEMI
     ;
 
 list_of_net_identifiers
-    : net_identifier ( ',' net_identifier )*
+    : net_identifier ( COMMA net_identifier )*
     ;
 
 net_identifier
@@ -1310,11 +1292,11 @@ net_identifier
     ;
 
 list_of_net_decl_assignments
-    : net_decl_assignment ( ',' net_decl_assignment )*
+    : net_decl_assignment ( COMMA net_decl_assignment )*
     ;
 
 net_decl_assignment
-    : identifier ( range )? '=' expression
+    : identifier ( range )? ASSIGN_EQ expression
     ;
 
 /* ================================================================================================  */
@@ -1322,32 +1304,32 @@ net_decl_assignment
 /* ================================================================================================  */
 
 reg_declaration
-    : 'reg' ( range )? list_of_variable_identifiers ';'
+    : REG ( range )? list_of_variable_identifiers SEMI
     ;
 
 integer_declaration
-    : 'integer' list_of_variable_identifiers ';'
+    : INTEGER list_of_variable_identifiers SEMI
     ;
 
 real_declaration
-    : 'real' list_of_real_identifiers ';'
+    : REAL list_of_real_identifiers SEMI
     ;
 
 time_declaration
-    : 'time' list_of_variable_identifiers ';'
+    : TIME list_of_variable_identifiers SEMI
     ;
 
 realtime_declaration
-    : 'realtime' list_of_real_identifiers ';'
+    : REALTIME list_of_real_identifiers SEMI
     ;
 
 // 共用子规则
 list_of_variable_identifiers
-    : variable_identifier ( ',' variable_identifier )*
+    : variable_identifier ( COMMA variable_identifier )*
     ;
 
 list_of_real_identifiers
-    : real_identifier ( ',' real_identifier )*
+    : real_identifier ( COMMA real_identifier )*
     ;
 
 variable_identifier
@@ -1369,17 +1351,8 @@ identifier
     | ESCAPED_IDENTIFIER
     ;
 
-// 词法规则补充（如果尚未定义）
-SIMPLE_IDENTIFIER
-    : [a-zA-Z_][a-zA-Z0-9_$]*
-    ;
-
 port_identifier
     : identifier
-    ;
-
-fragment escaped_identifier
-    : ESCAPED_IDENTIFIER
     ;
 
 // 驱动强度（IEEE 1364-2005 第3.2.1节）

@@ -64,6 +64,7 @@ INITIAL         : 'initial';
 INOUT           : 'inout';
 INPUT           : 'input';
 INTEGER         : 'integer';
+IFNONE          : 'ifnone';
 JOIN            : 'join';
 LARGE           : 'large';
 LOCALPARAM      : 'localparam';
@@ -145,13 +146,18 @@ LONGINT         : 'longint';
 BYTE            : 'byte';
 BIT             : 'bit';
 LOGIC           : 'logic';
-// 数字常量（IEEE 1364-2005 第2.5节）
-NUMBER
-    : DECIMAL_NUMBER
-    | OCTAL_NUMBER
-    | BINARY_NUMBER
-    | HEX_NUMBER
-    | REAL_NUMBER
+
+// 完整数字常量模式
+BINARY_CONSTANT
+    : SIZE_DIGIT? SINGLE_QUOTE [bB] [01xXzZ_]+
+    | SINGLE_QUOTE [01xXzZ]
+    ;
+
+// 标量常量特例（作为 BINARY_CONSTANT 的子集）
+SCALAR_CONSTANT
+    : '1\'b' [01]
+    | '1\'B' [01]
+    | '\'' [01]
     ;
 
 fragment DECIMAL_NUMBER
@@ -177,30 +183,37 @@ fragment REAL_NUMBER
     | [0-9]+ [eE] [+-]? [0-9]+
     ;
 
+// 数字常量（IEEE 1364-2005 第2.5节）
+NUMBER
+    : DECIMAL_NUMBER
+    | OCTAL_NUMBER
+    | BINARY_NUMBER
+    | HEX_NUMBER
+    | REAL_NUMBER
+    ;
+
 // 标识符（IEEE 1364-2005 第2.7节）
 IDENTIFIER
     : SIMPLE_IDENTIFIER
     | ESCAPED_IDENTIFIER
     ;
 
-fragment SIMPLE_IDENTIFIER
-    : [a-zA-Z_] [a-zA-Z0-9_$]*
-    ;
-
-fragment ESCAPED_IDENTIFIER
-    : '\\' ~[ \r\n\t]+
-    ;
-
-// UDP专用符号（IEEE 1364-2005 第8.2节）
-fragment BINARY_DIGIT: [01];
-fragment UDP_EDGE: '(' BINARY_DIGIT BINARY_DIGIT ')';
 
 // 标准表8-3/8-4/8-5中的符号
 BANG: '!';
-UDP_EDGE_SYMBOL: UDP_EDGE;
+TILDE_CARET : '~^';  // 必须在 TILDE 和 CARET 之前定义
+CARET_TILDE : '^~';  // 必须在 TILDE 和 CARET 之前定义
+TILDE : '~';
+CARET : '^';
 ONESTEP: 'x' | 'X';  // 标准允许的初始化简写
+// 定义所有词法规则（大写开头）
+STRING : '"' .*? '"' ;                      // 字符串规则
+SIMPLE_IDENTIFIER : [a-zA-Z_] [a-zA-Z0-9_$]* ;  // 普通标识符
+ESCAPED_IDENTIFIER : '\\' ~[ \r\t\n]+ ;     // 转义标识符（如 \abc ）
 
 // 运算符（IEEE 1364-2005 第4.1节）
+
+AND3            : '&&&';
 PLUS            : '+';
 MINUS           : '-';
 STAR            : '*';
@@ -217,7 +230,7 @@ BIT_AND         : '&';
 BIT_OR          : '|';
 BIT_NOT         : '~';
 BIT_XOR         : '^';
-BIT_XNOR        : '~^' | '^~';
+BIT_XNOR        : TILDE_CARET | CARET_TILDE;
 REDUCE_NOR      : '~|';
 REDUCE_NAND     : '~&';
 LEFT_SHIFT      : '<<';
@@ -246,6 +259,35 @@ LBRACK          : '[';
 RBRACK          : ']';
 LBRACE          : '{';
 RBRACE          : '}';
+
+PLUS_COLON      : '+:';
+MINUS_COLON     : '-:';
+IMPLIES         : '=>';
+STAR_GT         : '*>';
+
+SINGLE_QUOTE    : '\'';
+BINARY_VALUE    : [01xXzZ];
+BINARY_DIGIT    : [01];
+SIZE_DIGIT      : [0-9]+;
+
+// UDP专用符号（IEEE 1364-2005 第8.2节）
+fragment UDP_EDGE: '(' BINARY_DIGIT BINARY_DIGIT ')';
+UDP_EDGE_SYMBOL: UDP_EDGE;
+
+// 系统任务和函数
+DOLLAR_SETUP    : '$setup';
+DOLLAR_HOLD     : '$hold';
+DOLLAR_WIDTH    : '$width';
+DOLLAR_RECOVERY : '$recovery';
+DOLLAR_SKEW     : '$skew';
+
+// 数字常量
+BINARY_0        : '1\'b0';
+BINARY_1        : '1\'b1';
+BINARY_UPPER_0  : '1\'B0';
+BINARY_UPPER_1  : '1\'B1';
+QUOTED_0        : '\'0';
+QUOTED_1        : '\'1';
 
 // 门级原语延迟符号
 ARROW           : '->';
