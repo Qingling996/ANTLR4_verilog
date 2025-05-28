@@ -22,7 +22,9 @@ module adder #(
     input                                         I_rst_n                       ,//Reset Signal, Low Valid
     input                [C_DATA_WIDTH-1:0 ]      I_a                           ,//
     input                [C_DATA_WIDTH-1:0 ]      I_b                           ,//
+    input                                         a,b,c,d,e,f                   ,
     /* --------------------- Output Signals -------------------- */
+    output               [ 2:0 ]                  x,y,z,w,
     input                [C_DATA_WIDTH:0 ]        O_sum                         //
 );
 
@@ -30,5 +32,8 @@ module adder #(
 /*                                             Main Code                                             */
 /* ================================================================================================  */
     assign          O_sum                         = I_a + I_b;
-
+    assign          x                             = a + b * c - d / e;
+    assign          y                             = (a + b) * (c - d);
+    assign          z                             = a && b || c;
+    assign          w                             = a < b ? c + d : e * f;
 endmodule //adder END

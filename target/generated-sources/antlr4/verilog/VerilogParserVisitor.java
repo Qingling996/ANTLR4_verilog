@@ -905,6 +905,78 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpression(VerilogParser.ExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link VerilogParser#conditional_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConditional_expression(VerilogParser.Conditional_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#logical_or_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLogical_or_expression(VerilogParser.Logical_or_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#logical_and_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLogical_and_expression(VerilogParser.Logical_and_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#bitwise_or_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBitwise_or_expression(VerilogParser.Bitwise_or_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#bitwise_xor_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBitwise_xor_expression(VerilogParser.Bitwise_xor_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#bitwise_and_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBitwise_and_expression(VerilogParser.Bitwise_and_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#equality_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEquality_expression(VerilogParser.Equality_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#relational_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRelational_expression(VerilogParser.Relational_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#shift_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShift_expression(VerilogParser.Shift_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#additive_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAdditive_expression(VerilogParser.Additive_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#multiplicative_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMultiplicative_expression(VerilogParser.Multiplicative_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#unary_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUnary_expression(VerilogParser.Unary_expressionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link VerilogParser#primary}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -1055,11 +1127,96 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStatement_or_null(VerilogParser.Statement_or_nullContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link VerilogParser#statement}.
+	 * Visit a parse tree produced by the {@code BlockingAssignmentStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStatement(VerilogParser.StatementContext ctx);
+	T visitBlockingAssignmentStmt(VerilogParser.BlockingAssignmentStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code NonBlockingAssignmentStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNonBlockingAssignmentStmt(VerilogParser.NonBlockingAssignmentStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ProceduralContinuousAssignStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProceduralContinuousAssignStmt(VerilogParser.ProceduralContinuousAssignStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code CaseStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCaseStmt(VerilogParser.CaseStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code IfElseStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIfElseStmt(VerilogParser.IfElseStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LoopStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLoopStmt(VerilogParser.LoopStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code WaitStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWaitStmt(VerilogParser.WaitStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DisableStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDisableStmt(VerilogParser.DisableStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code EventTriggerStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEventTriggerStmt(VerilogParser.EventTriggerStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SeqBlockStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSeqBlockStmt(VerilogParser.SeqBlockStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ParBlockStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParBlockStmt(VerilogParser.ParBlockStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TaskEnableStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTaskEnableStmt(VerilogParser.TaskEnableStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SystemTaskEnableStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSystemTaskEnableStmt(VerilogParser.SystemTaskEnableStmtContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link VerilogParser#procedural_continuous_assignments}.
 	 * @param ctx the parse tree

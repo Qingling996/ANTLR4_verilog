@@ -1498,6 +1498,126 @@ public interface VerilogParserListener extends ParseTreeListener {
 	 */
 	void exitExpression(VerilogParser.ExpressionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link VerilogParser#conditional_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterConditional_expression(VerilogParser.Conditional_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VerilogParser#conditional_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitConditional_expression(VerilogParser.Conditional_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VerilogParser#logical_or_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterLogical_or_expression(VerilogParser.Logical_or_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VerilogParser#logical_or_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitLogical_or_expression(VerilogParser.Logical_or_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VerilogParser#logical_and_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterLogical_and_expression(VerilogParser.Logical_and_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VerilogParser#logical_and_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitLogical_and_expression(VerilogParser.Logical_and_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VerilogParser#bitwise_or_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterBitwise_or_expression(VerilogParser.Bitwise_or_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VerilogParser#bitwise_or_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitBitwise_or_expression(VerilogParser.Bitwise_or_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VerilogParser#bitwise_xor_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterBitwise_xor_expression(VerilogParser.Bitwise_xor_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VerilogParser#bitwise_xor_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitBitwise_xor_expression(VerilogParser.Bitwise_xor_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VerilogParser#bitwise_and_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterBitwise_and_expression(VerilogParser.Bitwise_and_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VerilogParser#bitwise_and_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitBitwise_and_expression(VerilogParser.Bitwise_and_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VerilogParser#equality_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterEquality_expression(VerilogParser.Equality_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VerilogParser#equality_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitEquality_expression(VerilogParser.Equality_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VerilogParser#relational_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterRelational_expression(VerilogParser.Relational_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VerilogParser#relational_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitRelational_expression(VerilogParser.Relational_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VerilogParser#shift_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterShift_expression(VerilogParser.Shift_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VerilogParser#shift_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitShift_expression(VerilogParser.Shift_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VerilogParser#additive_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterAdditive_expression(VerilogParser.Additive_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VerilogParser#additive_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitAdditive_expression(VerilogParser.Additive_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VerilogParser#multiplicative_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterMultiplicative_expression(VerilogParser.Multiplicative_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VerilogParser#multiplicative_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitMultiplicative_expression(VerilogParser.Multiplicative_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VerilogParser#unary_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterUnary_expression(VerilogParser.Unary_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VerilogParser#unary_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitUnary_expression(VerilogParser.Unary_expressionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link VerilogParser#primary}.
 	 * @param ctx the parse tree
 	 */
@@ -1748,15 +1868,161 @@ public interface VerilogParserListener extends ParseTreeListener {
 	 */
 	void exitStatement_or_null(VerilogParser.Statement_or_nullContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link VerilogParser#statement}.
+	 * Enter a parse tree produced by the {@code BlockingAssignmentStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
 	 * @param ctx the parse tree
 	 */
-	void enterStatement(VerilogParser.StatementContext ctx);
+	void enterBlockingAssignmentStmt(VerilogParser.BlockingAssignmentStmtContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link VerilogParser#statement}.
+	 * Exit a parse tree produced by the {@code BlockingAssignmentStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
 	 * @param ctx the parse tree
 	 */
-	void exitStatement(VerilogParser.StatementContext ctx);
+	void exitBlockingAssignmentStmt(VerilogParser.BlockingAssignmentStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NonBlockingAssignmentStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterNonBlockingAssignmentStmt(VerilogParser.NonBlockingAssignmentStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NonBlockingAssignmentStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitNonBlockingAssignmentStmt(VerilogParser.NonBlockingAssignmentStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ProceduralContinuousAssignStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterProceduralContinuousAssignStmt(VerilogParser.ProceduralContinuousAssignStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ProceduralContinuousAssignStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitProceduralContinuousAssignStmt(VerilogParser.ProceduralContinuousAssignStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code CaseStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterCaseStmt(VerilogParser.CaseStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code CaseStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitCaseStmt(VerilogParser.CaseStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code IfElseStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterIfElseStmt(VerilogParser.IfElseStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code IfElseStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitIfElseStmt(VerilogParser.IfElseStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code LoopStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterLoopStmt(VerilogParser.LoopStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code LoopStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitLoopStmt(VerilogParser.LoopStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code WaitStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterWaitStmt(VerilogParser.WaitStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code WaitStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitWaitStmt(VerilogParser.WaitStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code DisableStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterDisableStmt(VerilogParser.DisableStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code DisableStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitDisableStmt(VerilogParser.DisableStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code EventTriggerStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterEventTriggerStmt(VerilogParser.EventTriggerStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code EventTriggerStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitEventTriggerStmt(VerilogParser.EventTriggerStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code SeqBlockStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterSeqBlockStmt(VerilogParser.SeqBlockStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code SeqBlockStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitSeqBlockStmt(VerilogParser.SeqBlockStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ParBlockStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterParBlockStmt(VerilogParser.ParBlockStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ParBlockStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitParBlockStmt(VerilogParser.ParBlockStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code TaskEnableStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterTaskEnableStmt(VerilogParser.TaskEnableStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code TaskEnableStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitTaskEnableStmt(VerilogParser.TaskEnableStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code SystemTaskEnableStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterSystemTaskEnableStmt(VerilogParser.SystemTaskEnableStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code SystemTaskEnableStmt}
+	 * labeled alternative in {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitSystemTaskEnableStmt(VerilogParser.SystemTaskEnableStmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link VerilogParser#procedural_continuous_assignments}.
 	 * @param ctx the parse tree

@@ -882,26 +882,70 @@ system_constant // SystemVerilog specific constants like '1'b1, '0'
     ;
 
 // General expression (can include variables, function calls, etc.)
+// 优化表达式分层
 expression
-    : primary
-    | unary_operator ( attribute_instance )* expression // Unary op applies to expression
-    | expression ( attribute_instance )* binary_operator ( attribute_instance )* expression // Binary op between expressions
-    | expression ( attribute_instance )* QUESTION ( attribute_instance )* expression COLON expression // Ternary op
-    | LPAREN expression RPAREN
-    | STRING  // String literal
+    : conditional_expression
+    ;
+
+conditional_expression
+    : logical_or_expression (QUESTION expression COLON expression)?
+    ;
+
+logical_or_expression
+    : logical_and_expression (LOG_OR logical_and_expression)*
+    ;
+
+logical_and_expression
+    : bitwise_or_expression (LOG_AND bitwise_or_expression)*
+    ;
+
+bitwise_or_expression
+    : bitwise_xor_expression (OR bitwise_xor_expression)*
+    ;
+
+bitwise_xor_expression
+    : bitwise_and_expression (XOR bitwise_and_expression)*
+    ;
+
+bitwise_and_expression
+    : equality_expression (AND equality_expression)*
+    ;
+
+equality_expression
+    : relational_expression ((LOG_EQ | LOG_NEQ | CASE_EQ | CASE_NEQ) relational_expression)*
+    ;
+
+relational_expression
+    : shift_expression ((LESS | LESS_EQ | GREATER | GREATER_EQ) shift_expression)*
+    ;
+
+shift_expression
+    : additive_expression ((LEFT_SHIFT | RIGHT_SHIFT) additive_expression)*
+    ;
+
+additive_expression
+    : multiplicative_expression ((PLUS | MINUS) multiplicative_expression)*
+    ;
+
+multiplicative_expression
+    : unary_expression ((STAR | DIV | MOD) unary_expression)*
+    ;
+
+unary_expression
+    : (unary_operator)? primary
     ;
 
 primary
     : NUMBER
-    | identifier ( LBRACK range_expression RBRACK )? // Variable access with optional select/range
+    | identifier ( LBRACK range_expression RBRACK )?
     | concatenation_expression
     | multiple_concatenation
     | function_call
     | system_function_call
-    | constant_function_call // Constant functions can be used in non-constant contexts
-    | LPAREN mintypmax_expression RPAREN
-    | MINUS NUMBER // Negative number primary
-    | PLUS NUMBER  // Positive number primary
+    | constant_function_call
+    | LPAREN expression RPAREN
+    | MINUS NUMBER
+    | PLUS NUMBER
     ;
 
 concatenation_expression
@@ -1032,20 +1076,20 @@ statement_or_null
 // 过程语句 (Procedural Statements) - IEEE 1364-2005 Section 9
 // 过程块内的各种语句类型。
 //===========================================================================//
-statement // Note: statement itself is often a flat list of options
-    : blocking_assignment SEMI
-    | non_blocking_assignment SEMI
-    | procedural_continuous_assignments SEMI // assign, deassign, force, release
-    | case_statement
-    | conditional_statement
-    | loop_statement
-    | wait_statement SEMI // wait statement needs SEMI
-    | disable_statement SEMI // disable statement needs SEMI
-    | event_trigger SEMI
-    | seq_block
-    | par_block
-    | task_enable SEMI // task calls need SEMI
-    | system_task_enable // System task calls include SEMI
+statement
+    : blocking_assignment SEMI                #BlockingAssignmentStmt
+    | non_blocking_assignment SEMI            #NonBlockingAssignmentStmt
+    | procedural_continuous_assignments SEMI  #ProceduralContinuousAssignStmt
+    | case_statement                          #CaseStmt
+    | conditional_statement                   #IfElseStmt
+    | loop_statement                          #LoopStmt
+    | wait_statement SEMI                     #WaitStmt
+    | disable_statement SEMI                  #DisableStmt
+    | event_trigger SEMI                      #EventTriggerStmt
+    | seq_block                               #SeqBlockStmt
+    | par_block                               #ParBlockStmt
+    | task_enable SEMI                        #TaskEnableStmt
+    | system_task_enable                      #SystemTaskEnableStmt
     ;
 
 // Procedural continuous assignments (assign, deassign, force, release within blocks)
