@@ -122,6 +122,7 @@ TRIAND          : 'triand';
 TRIOR           : 'trior';
 TRIREG          : 'trireg';
 UNSIGNED        : 'unsigned';
+UWIRE           : 'uwire';
 VECTORED        : 'vectored';
 WAIT            : 'wait';
 WAND            : 'wand';
@@ -282,6 +283,10 @@ DOLLAR_HOLD     : '$hold';
 DOLLAR_WIDTH    : '$width';
 DOLLAR_RECOVERY : '$recovery';
 DOLLAR_SKEW     : '$skew';
+DOLLAR_TIMESKEW : '$timeskew';
+DOLLAR_FULLSKEW : '$fullskew';
+DOLLAR_PERIOD   : '$period';
+DOLLAR_NOCHANGE : '$nochange';
 
 // 数字常量
 BINARY_0        : '1\'b0';

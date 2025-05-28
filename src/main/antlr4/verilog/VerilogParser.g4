@@ -4,23 +4,33 @@ options {
     tokenVocab = VerilogLexer;
 }
 
-// 源文本结构（IEEE 1364-2005 第3章）
+//===========================================================================//
+// 源文本结构 (Source Text Structure) - IEEE 1364-2005 Section 3
+// 定义Verilog源文件的顶级结构，包含一个或多个描述块。
+//===========================================================================//
 source_text
     : ( description )* EOF
     ;
 
+//===========================================================================//
+// 描述块 (Description) - IEEE 1364-2005 Section 3
+// 一个描述块可以是模块、用户定义原语或配置。
+//===========================================================================//
 description
     : module_declaration
     | udp_declaration
     | config_declaration
     ;
 
-// 模块声明（IEEE 1364-2005 第3.12节）
+//===========================================================================//
+// 模块声明 (Module Declaration) - IEEE 1364-2005 Section 3.12
+// 定义一个Verilog模块。
+//===========================================================================//
 module_declaration
     : ( attribute_instance )* module_keyword module_identifier
       ( parameter_port_list )?
       ( list_of_ports )? SEMI
-      ( module_item )*
+      ( module_item )*            // 模块内部各项，通过module_item分组
       ENDMODULE
     ;
 
@@ -29,7 +39,10 @@ module_keyword
     | MACROMODULE
     ;
 
-/* IEEE 1364-2005 附录A.8 用户定义原语 */
+//===========================================================================//
+// 用户定义原语 (UDP Declaration) - IEEE 1364-2005 Appendix A.8
+// 定义一个用户定义原语。
+//===========================================================================//
 udp_declaration
     : ( attribute_instance )* PRIMITIVE udp_identifier
       LPAREN udp_port_list RPAREN SEMI
@@ -42,12 +55,10 @@ udp_identifier
     : identifier
     ;
 
-// 端口标识符扩展
 udp_port_identifier
     : identifier
     ;
 
-// 输出端口标识符（特殊规则）
 output_port_identifier
     : identifier
     ;
@@ -65,7 +76,13 @@ input_port
     : port_identifier
     ;
 
-// UDP端口声明（IEEE 1364-2005 第8.1.3节）
+// UDP端口声明 (UDP Port Declaration) - IEEE 1364-2005 Section 8.1.3
+udp_port_declaration
+    : output_declaration SEMI
+    | input_declaration SEMI
+    | reg_declaration SEMI // reg_declaration includes SEMI in its own rule
+    ;
+
 output_declaration
     : OUTPUT output_port_identifier
     | OUTPUT REG output_port_identifier ( ASSIGN_EQ constant_expression )?
@@ -79,12 +96,6 @@ list_of_udp_port_identifiers
     : udp_port_identifier ( COMMA udp_port_identifier )*
     ;
 
-udp_port_declaration
-    : output_declaration SEMI
-    | input_declaration SEMI
-    | reg_declaration SEMI
-    ;
-
 udp_body
     : combinational_body
     | sequential_body
@@ -94,17 +105,16 @@ combinational_body
     : TABLE combinational_entry+ ENDTABLE
     ;
 
-// 组合逻辑表条目（标准表8-1）
+// 组合逻辑表条目 (Combinational Entry) - Standard Table 8-1
 combinational_entry
     : level_input_list COLON output_symbol SEMI
     ;
-
 
 sequential_body
     : ( udp_initial_stmt )? TABLE sequential_entry + ENDTABLE
     ;
 
-// 时序逻辑表条目（标准表8-2）
+// 时序逻辑表条目 (Sequential Entry) - Standard Table 8-2
 sequential_entry
     : seq_input_list COLON current_state COLON next_state SEMI
     ;
@@ -113,38 +123,38 @@ udp_initial_stmt
     : INITIAL output_port_identifier ASSIGN_EQ init_val SEMI
     ;
 
-// 输入电平列表（标准第8.2.1节）
+// 输入电平列表 (Level Input List) - Standard Section 8.2.1
 level_input_list
     : level_symbol+
     ;
 
-// 序列输入列表（标准第8.2.2节）
+// 序列输入列表 (Seq Input List) - Standard Section 8.2.2
 seq_input_list
     : seq_symbol+
     ;
 
-// 初始化值（标准第8.2.3节）
+// 初始化值 (Initial Value) - Standard Section 8.2.3
 init_val
     : BINARY_NUMBER
     | DECIMAL_NUMBER
     | ONESTEP
-    | ONESTEP BINARY_NUMBER
+    | ONESTEP BINARY_NUMBER // Assuming ONESTEP can be followed by a number
     ;
 
-// 电平符号定义（标准表8-3）
+// 电平符号定义 (Level Symbol) - Standard Table 8-3
 level_symbol
     : BINARY_DIGIT  // 0, 1
     | QUESTION      // ?
-    | LOG_NOT          // !
+    | LOG_NOT       // !
     ;
 
-// 序列符号定义（标准表8-4）
+// 序列符号定义 (Seq Symbol) - Standard Table 8-4
 seq_symbol
     : level_symbol
     | UDP_EDGE_SYMBOL   // (01), (10), etc.
     ;
 
-// 输出状态符号（标准表8-5）
+// 输出状态符号 (Output Symbol) - Standard Table 8-5
 output_symbol
     : BINARY_DIGIT
     | QUESTION
@@ -158,23 +168,25 @@ current_state
 next_state
     : output_symbol
     ;
+
 //===========================================================================//
-// 配置声明（标准第13.2节）
+// 配置声明 (Config Declaration) - Standard Section 13.2
+// 定义一个配置块。
 //===========================================================================//
 config_declaration:
     CONFIG config_identifier SEMI
-    ( local_parameter_declaration )*
+    ( local_parameter_declaration )* // local_parameter_declaration includes SEMI
     design_statement
     ( config_rule_statement )*
     ENDCONFIG ( COLON config_identifier )?
     ;
 
-// 设计语句（标准第13.3节）
+// 设计语句 (Design Statement) - Standard Section 13.3
 design_statement:
     DESIGN ( ( library_identifier DOT )? cell_identifier )? SEMI
     ;
 
-// 配置规则语句（标准第13.4节）
+// 配置规则语句 (Config Rule Statement) - Standard Section 13.4
 config_rule_statement:
     default_clause liblist_clause SEMI
     | inst_clause liblist_clause SEMI
@@ -183,46 +195,64 @@ config_rule_statement:
     | cell_clause use_clause SEMI
     ;
 
-// 子句规则（标准第13.4.1-13.4.4节）
+// 子句规则 (Clause Rules) - Standard Section 13.4.1-13.4.4
 default_clause: DEFAULT;
 inst_clause: INSTANCE inst_name;
 cell_clause: CELL ( library_identifier DOT )? cell_identifier;
 liblist_clause: LIBLIST ( library_identifier )*;
 use_clause: USE ( library_identifier DOT )? cell_identifier ( COLON CONFIG )?;
 
-// 辅助规则
+// 辅助规则 for config
 config_identifier: identifier;
 inst_name: identifier ( DOT identifier )*;
 library_identifier: identifier;
 cell_identifier: identifier;
-//===============================================================//
-// 参数端口列表（IEEE 1364-2005 第12.2节）
-//===============================================================//
-// 参数声明部分（保持原有简洁格式）
+
+//===========================================================================//
+// 参数和局部参数声明 (Parameter and Localparam Declaration) - IEEE 1364-2005 Section 12.1
+// 定义参数或局部参数。
+//===========================================================================//
 parameter_declaration
-    : (PARAMETER | LOCALPARAM) 
-      ( SIGNED )? ( range )? 
+    : (PARAMETER | LOCALPARAM)
+      ( SIGNED )? ( range )?
       list_of_param_assignments SEMI
     ;
 
-// 参数覆盖部分（使用完整格式）
-parameter_override
-    : DEFPARAM list_of_defparam_assignments SEMI  // 修改规则名避免歧义
+local_parameter_declaration
+    : LOCALPARAM ( parameter_type list_of_param_assignments // Type specified
+                   | list_of_param_assignments ) // No type, inferred
+      SEMI
     ;
+
+range
+    : LBRACK constant_expression COLON constant_expression RBRACK
+    ;
+//===========================================================================//
+// 参数覆盖 (Parameter Override / Defparam) - IEEE 1364-2005 Section 12.2.5
+// 使用defparam关键字覆盖参数值。
+//===========================================================================//
+parameter_override
+    : DEFPARAM list_of_defparam_assignments SEMI
+    ;
+
 list_of_defparam_assignments
     : defparam_assignment ( COMMA defparam_assignment )*
     ;
+
 defparam_assignment
-    : hierarchical_parameter_identifier ASSIGN constant_expression  // 强制要求赋值
+    : hierarchical_parameter_identifier ASSIGN constant_expression
     ;
 
+//===========================================================================//
+// 参数赋值列表 (List of Parameter Assignments)
+// 用于参数声明和参数端口列表。
+//===========================================================================//
 list_of_param_assignments
     : param_assignment ( COMMA param_assignment )*
     ;
 
 param_assignment
-    : parameter_identifier ( ASSIGN_EQ constant_expression )?  // 兼容原有规则
-    | hierarchical_parameter_identifier ASSIGN constant_expression  // 新增defparam专用格式
+    : parameter_identifier ( ASSIGN_EQ constant_expression )?
     ;
 
 hierarchical_parameter_identifier
@@ -233,35 +263,37 @@ parameter_identifier
     : identifier
     ;
 
+//===========================================================================//
+// 参数端口列表 (Parameter Port List) - IEEE 1364-2005 Section 12.2
+// 模块头部可选的参数列表。
+//===========================================================================//
 parameter_port_list
     : HASH LPAREN ( param_assignment ( COMMA param_assignment )* )? RPAREN
     ;
 
-local_parameter_declaration
-    : LOCALPARAM ( parameter_type list_of_param_assignments
-                   | list_of_param_assignments )
-    ;
-
-parameter_type
+//===========================================================================//
+// 数据类型 (Data Types) - IEEE 1364-2005 Section 4
+// 定义各种数据类型。
+//===========================================================================//
+parameter_type // Used in localparam declaration
     : integer_type
     | real_type
     | realtime_type
     | time_type
     | signed_type
     | unsigned_type
-    | type_identifier  // 用户定义类型
+    | type_identifier  // User-defined types (SystemVerilog feature, but included for completeness)
     ;
 
-// 基础类型（标准第4章）
 integer_type
-    : INTEGER       // Verilog标准类型
-    | REG           // Verilog寄存器类型
-    | INT           // SystemVerilog短整型
-    | SHORTINT      // SystemVerilog短整型
-    | LONGINT       // SystemVerilog长整型
-    | BYTE          // SystemVerilog字节类型
-    | BIT           // SystemVerilog二进制类型
-    | LOGIC         // SystemVerilog四态逻辑
+    : INTEGER       // Verilog standard type
+    | REG           // Verilog register type
+    | INT           // SystemVerilog shortint, int, longint (simplified representation)
+    | SHORTINT
+    | LONGINT
+    | BYTE
+    | BIT           // SystemVerilog bit type
+    | LOGIC         // SystemVerilog 4-state logic
     ;
 real_type : REAL | REALTIME;
 realtime_type: REALTIME;
@@ -270,50 +302,59 @@ signed_type: SIGNED;
 unsigned_type: UNSIGNED;
 
 type_identifier
-    : identifier  // 用户定义类型名
+    : identifier  // User defined type name
     ;
 
 //======================================================================//
-// 端口声明（IEEE 1364-2005 第12.3节）
+// 端口列表 (Port List) - IEEE 1364-2005 Section 12.3
+// 模块头部可选的端口列表。
 //======================================================================//
 list_of_ports
     : LPAREN port ( COMMA port )* RPAREN
-    | LPAREN RPAREN
+    | LPAREN RPAREN // Empty port list
     ;
 
 port
-    : ( attribute_instance )* port_expression?
-    | ( attribute_instance )* DOT port_identifier LPAREN port_expression? RPAREN
+    : ( attribute_instance )* port_expression? // Standard port connection (implicit or ordered)
+    | ( attribute_instance )* DOT port_identifier LPAREN port_expression? RPAREN // Named port connection
     ;
 
 port_expression
     : port_reference
-    | LBRACE port_reference ( COMMA port_reference )* RBRACE
+    | LBRACE port_reference ( COMMA port_reference )* RBRACE // Concatenation in port list
     ;
 
 port_reference
     : port_identifier
-    | port_identifier LBRACK constant_expression RBRACK
-    | port_identifier LBRACK range_expression RBRACK
+    | port_identifier LBRACK constant_expression RBRACK // Bit-select
+    | port_identifier LBRACK range_expression RBRACK // Part-select (range_expression allows variables here)
     ;
 
-// 模块项（IEEE 1364-2005 第3.12节）
+//===========================================================================//
+// 模块项 (Module Item) - IEEE 1364-2005 Section 3.12
+// 模块内部的各种声明、定义、实例化和行为块等。
+// 此规则通过分组实现层次化。
+//===========================================================================//
 module_item
-    : port_declaration SEMI
-    | non_port_module_item
+    : port_declaration SEMI // Port declarations listed within the module body
+    | non_port_module_item  // Other items within the module body
     ;
 
+//===========================================================================//
+// 端口声明 (Port Declaration) - IEEE 1364-2005 Section 12.3
+// 模块内部对端口的详细声明。
+//===========================================================================//
 port_declaration
-    : ( port_type )? ( range )? list_of_port_identifiers
+    : ( attribute_instance )* port_direction ( net_type )? ( range )? list_of_port_identifiers // Input/Output/Inout net/reg declaration
+    | ( attribute_instance )* port_direction REG ( range )? list_of_port_identifiers // Input/Output/Inout reg declaration
+    | ( attribute_instance )* ( net_type )? ( range )? list_of_port_identifiers // Implicit direction (standard allows this in some cases)
+    | ( attribute_instance )* REG ( range )? list_of_port_identifiers // Implicit direction reg
     ;
 
-port_type
-    : net_type
-    | REG ( range )?
-    ;
-
-range
-    : LBRACK constant_expression COLON constant_expression RBRACK
+port_direction
+    : INPUT
+    | OUTPUT
+    | INOUT
     ;
 
 net_type
@@ -327,76 +368,141 @@ net_type
     | TRI1
     | SUPPLY0
     | SUPPLY1
-    ;
-
-port_direction
-    : INPUT
-    | OUTPUT
-    | INOUT
+    | UWIRE // SystemVerilog uwire
     ;
 
 list_of_port_identifiers
     : port_identifier ( COMMA port_identifier )*
     ;
 
-
-// 非端口模块项（IEEE 1364-2005 第3.12节）
+//===========================================================================//
+// 非端口模块项分组 (Grouped Non-Port Module Items) - IEEE 1364-2005 Section 3.12
+// 将模块内部非端口声明的项进行分组，以提高解析树的层次结构。
+//===========================================================================//
 non_port_module_item
-    : generate_region
-    | parameter_override SEMI
-    | gate_instantiation
-    | udp_instantiation
-    | module_instantiation
-    | specify_block
-    | initial_construct
-    | always_construct
-    | continuous_assign SEMI
-    | net_declaration
-    | reg_declaration
-    | time_declaration SEMI
-    | integer_declaration SEMI
-    | real_declaration SEMI
-    | event_declaration SEMI
-    | genvar_declaration SEMI
-    | task_declaration
-    | function_declaration
-    | local_parameter_declaration SEMI
-    | parameter_declaration SEMI
+    : module_declaration_item       // Various declarations (net, reg, param, etc.)
+    | module_instantiation_item     // Instantiations (module, udp, gate)
+    | module_assignment_item        // Assignments (continuous, parameter override)
+    | module_procedural_item      // Behavioral blocks (initial, always)
+    | module_structural_item      // Structural items (generate, specify)
+    | module_task_function_item     // Task and Function definitions
     ;
-/* ================================================================================================  */
-/*                                          generate_region                                          */
-/* ================================================================================================  */
+
+// Declarations within a module (grouped)
+module_declaration_item
+    : parameter_declaration // Includes SEMI
+    | local_parameter_declaration // Includes SEMI
+    | net_declaration // Includes SEMI
+    | reg_declaration // Includes SEMI
+    | integer_declaration // Includes SEMI
+    | real_declaration // Includes SEMI
+    | realtime_declaration SEMI // Need to add SEMI here as realtime_declaration rule might not have it
+    | time_declaration // Includes SEMI
+    | event_declaration // Includes SEMI
+    | genvar_declaration // Includes SEMI
+    ;
+
+// Instantiations within a module (grouped)
+module_instantiation_item
+    : module_instantiation // Includes SEMI
+    | udp_instantiation // Includes SEMI
+    | gate_instantiation // Includes SEMI
+    ;
+
+// Assignments within a module (grouped)
+module_assignment_item
+    : continuous_assign // Includes SEMI
+    | parameter_override // Includes SEMI
+    ;
+
+// Behavioral/Procedural blocks within a module (grouped)
+module_procedural_item
+    : initial_construct // Ends with statement_or_null
+    | always_construct // Ends with statement_or_null
+    ;
+
+// Structural/Hierarchical items within a module (grouped)
+module_structural_item
+    : generate_region // Includes GENERATE/ENDGENERATE
+    | specify_block // Includes SPECIFY/ENDSPECIFY
+    ;
+
+// Task and Function definitions within a module (grouped)
+module_task_function_item
+    : task_declaration // Includes TASK/ENDTASK
+    | function_declaration // Includes FUNCTION/ENDFUNCTION
+    ;
+
+
+//===========================================================================//
+// 生成区域 (Generate Region) - IEEE 1364-2005 Section 12.3.5
+// 定义一个生成块，用于例化或生成代码。
+//===========================================================================//
 generate_region
     : GENERATE ( generate_item )* ENDGENERATE
     ;
 
+//===========================================================================//
+// 生成项 (Generate Item) - IEEE 1364-2005 Section 12.3.5
+// 生成块内部的各种声明、实例化、行为块和控制结构。
+// 此规则通过分组实现层次化。
+//===========================================================================//
 generate_item
-    : module_or_generate_item
-    | generate_conditional_statement
-    | generate_case_statement
-    | generate_loop_statement
-    | generate_block
+    : generate_declaration_item     // Declarations within generate (subset)
+    | generate_instantiation_item   // Instantiations within generate
+    | generate_assignment_item      // Assignments within generate
+    | generate_procedural_item    // Behavioral blocks within generate
+    | generate_structural_item    // Nested generate region or block
+    | generate_control_statement    // Conditional, case, loop generate statements
     ;
 
-module_or_generate_item
-    : parameter_override
-    | gate_instantiation
-    | module_instantiation
-    | net_declaration
-    | reg_declaration
-    | continuous_assign
-    | initial_construct
-    | always_construct
-    | generate_region
+// Declarations allowed directly within a generate block (grouped)
+generate_declaration_item
+    : parameter_declaration // Includes SEMI
+    | local_parameter_declaration // Includes SEMI
+    | net_declaration // Includes SEMI
+    | reg_declaration // Includes SEMI
     ;
+
+// Instantiations allowed directly within a generate block (grouped)
+generate_instantiation_item
+    : gate_instantiation // Includes SEMI
+    | module_instantiation // Includes SEMI
+    ;
+
+// Assignments allowed directly within a generate block (grouped)
+generate_assignment_item
+    : continuous_assign // Includes SEMI
+    | parameter_override // Includes SEMI
+    ;
+
+// Behavioral/Procedural blocks allowed directly within a generate block (grouped)
+generate_procedural_item
+    : initial_construct // Ends with statement_or_null
+    | always_construct // Ends with statement_or_null
+    ;
+
+// Structural/Hierarchical items allowed directly within a generate block (grouped)
+generate_structural_item
+    : generate_region // Nested generate region
+    | generate_block  // Named or unnamed begin/end block
+    ;
+
+// Conditional and loop statements for generate (grouped)
+generate_control_statement
+    : generate_conditional_statement
+    | generate_case_statement
+    | generate_loop_statement
+    ;
+
 
 block_identifier
     : identifier
     ;
 
 generate_block
-    : BEGIN ( COLON block_identifier )? 
-      ( generate_item )* 
+    : BEGIN ( COLON block_identifier )?
+      ( generate_item )* // Items within the generate begin/end block
       END
     ;
 
@@ -430,13 +536,13 @@ genvar_iteration
     ;
 
 genvar_expression
-    : constant_expression
+    : constant_expression // Should be a constant expression
     ;
 
-/* ================================================================================================  */
-/*                                         genvar_declaration                                        */
-/* ================================================================================================  */
-
+//===========================================================================//
+// Genvar 声明 (Genvar Declaration) - IEEE 1364-2005 Section 12.3.5
+// 声明用于生成循环的genvar变量。
+//===========================================================================//
 genvar_declaration
     : GENVAR list_of_genvar_identifiers SEMI
     ;
@@ -449,9 +555,10 @@ genvar_identifier
     : identifier
     ;
 
-/* ================================================================================================  */
-/*                                        module_instantiation                                       */
-/* ================================================================================================  */
+//===========================================================================//
+// 模块实例化 (Module Instantiation) - IEEE 1364-2005 Section 12.3
+// 实例化其他模块。
+//===========================================================================//
 module_instantiation
     : module_identifier ( drive_strength )? ( parameter_value_assignment )?
       module_instance ( COMMA module_instance )* SEMI
@@ -475,11 +582,12 @@ named_parameter_assignment
     ;
 
 module_instance
-    : name_of_instance LPAREN list_of_port_connections RPAREN
+    : name_of_instance ( range )? // Instance array optional range
+      LPAREN list_of_port_connections RPAREN
     ;
 
 name_of_instance
-    : identifier ( range )?
+    : identifier
     ;
 
 list_of_port_connections
@@ -488,16 +596,17 @@ list_of_port_connections
     ;
 
 ordered_port_connection
-    : expression?  // 允许空连接（标准12.3.3）
+    : expression?  // Allows empty connection (e.g., .port())
     ;
 
 named_port_connection
-    : DOT port_identifier LPAREN expression? RPAREN
+    : DOT port_identifier LPAREN expression? RPAREN // Allows empty connection (e.g., .port())
     ;
 
-/* ================================================================================================  */
-/*                                         event_declaration                                         */
-/* ================================================================================================  */
+//===========================================================================//
+// 事件声明 (Event Declaration) - IEEE 1364-2005 Section 7.5
+// 声明同步事件变量。
+//===========================================================================//
 event_declaration
     : EVENT list_of_event_identifiers SEMI
     ;
@@ -510,15 +619,22 @@ event_identifier
     : identifier
     ;
 
+//===========================================================================//
+// 维度 (Dimension) - IEEE 1364-2005 Section 4.5
+// 声明数组或存储器的维度。
+//===========================================================================//
 dimension
     : LBRACK dimension_expression ( COLON dimension_expression )? RBRACK
     ;
 
 dimension_expression
-    : constant_expression  // 必须为常量表达式（标准第4.5节）
+    : constant_expression  // Must be a constant expression
     ;
 
-/* IEEE 1364-2005 第12.1.3节 属性实例 */
+//===========================================================================//
+// 属性实例 (Attribute Instance) - IEEE 1364-2005 Section 12.1.3
+// 附加用户定义的属性到Verilog语法元素。
+//===========================================================================//
 attribute_instance
     : LPAREN STAR attr_spec ( COMMA attr_spec )* STAR RPAREN
     ;
@@ -531,29 +647,30 @@ attr_name
     : identifier
     ;
 
-/* ================================================================================================  */
-/*                                赋值语句（IEEE 1364-2005 第9.2节）                                  */
-/* ================================================================================================  */
+//===========================================================================//
+// 赋值语句 (Assignment Statements) - IEEE 1364-2005 Section 9.2
+// 过程块内的阻塞和非阻塞赋值。
+//===========================================================================//
 blocking_assignment
-    : variable_lvalue ASSIGN_EQ ( delay_or_event_control )? expression SEMI
+    : variable_lvalue ASSIGN_EQ ( delay_or_event_control )? expression
     ;
 
 non_blocking_assignment
-    : variable_lvalue ASSIGN_LE ( delay_or_event_control )? expression SEMI
+    : variable_lvalue ASSIGN_LE ( delay_or_event_control )? expression
     ;
 
 variable_lvalue
     : hierarchical_variable_identifier ( select_or_range )?
-    | LBRACE variable_lvalue ( COMMA variable_lvalue )* RBRACE
+    | LBRACE variable_lvalue ( COMMA variable_lvalue )* RBRACE // Concatenation lvalue
     ;
 
 select_or_range
-    : LBRACK range_expression RBRACK    // 位选/片选
-    | DOT identifier                    // 结构体成员选择
+    : LBRACK range_expression RBRACK    // Bit-select or part-select
+    | DOT identifier                    // Structure member selection (SystemVerilog)
     ;
 
 hierarchical_variable_identifier
-    : ( identifier ( DOT identifier )* ) ( LBRACK constant_expression RBRACK )?
+    : ( identifier ( DOT identifier )* ) ( LBRACK constant_expression RBRACK )? // Allow array access on hierarchical path
     ;
 
 hierarchical_identifier
@@ -565,46 +682,56 @@ constant_bit_select
     ;
 
 bit_select
-    : LBRACK constant_expression RBRACK
+    : LBRACK expression RBRACK // Can be non-constant in behavioral code
     ;
 
 range_expression
-    : LBRACK expression ( COLON expression )? RBRACK  // 包含单比特和范围两种形式
+    : expression ( COLON expression )? RBRACK  // Bit-select or part-select (variable or constant)
     ;
-concatenation
+
+concatenation_lvalue // Explicit rule for concatenation on left side
     : LBRACE variable_lvalue ( COMMA variable_lvalue )* RBRACE
     ;
-/* ================================================================================================  */
-/*                                 条件语句（IEEE 1364-2005 第9.4节）                                 */
-/* ================================================================================================  */
+
+//===========================================================================//
+// 条件语句 (Conditional Statement) - IEEE 1364-2005 Section 9.4
+// if-else 结构。
+//===========================================================================//
 conditional_statement
     : IF LPAREN expression RPAREN statement_or_null
       ( ELSE statement_or_null )?
     ;
-/* ================================================================================================  */
-/*                                 循环语句（IEEE 1364-2005 第9.6节）                                 */
-/* ================================================================================================  */
+
+//===========================================================================//
+// 循环语句 (Loop Statements) - IEEE 1364-2005 Section 9.6
+// forever, repeat, while, for 循环。
+//===========================================================================//
 loop_statement
-    : FOREVER statement_or_null                         // ForeverLoop
-    | REPEAT LPAREN expression RPAREN statement_or_null // RepeatLoop
-    | WHILE LPAREN expression RPAREN statement_or_null  // WhileLoop
-    | FOR LPAREN 
-        for_initialization? SEMI 
-        expression? SEMI 
-        for_step? 
-      RPAREN statement_or_null                          // ForLoop
+    : FOREVER statement_or_null
+    | REPEAT LPAREN expression RPAREN statement_or_null
+    | WHILE LPAREN expression RPAREN statement_or_null
+    | FOR LPAREN
+        for_initialization? SEMI
+        expression? SEMI
+        for_step?
+      RPAREN statement_or_null
     ;
 
 for_initialization
-    : list_of_variable_assignments
-    | data_type_declaration list_of_variable_decl_assignments
+    : list_of_variable_assignments // Existing variables
+    | data_type_declaration list_of_variable_decl_assignments // New variable declaration (SystemVerilog)
     ;
 
 data_type_declaration
-    : INTEGER
+    : INTEGER // Simplified, can be more complex in SystemVerilog
     | REAL
     | REALTIME
     | TIME
+    | REG ( range )? // Reg declaration in for loop init
+    | integer_type ( range )? // More general SystemVerilog types
+    | real_type
+    | realtime_type
+    | time_type
     ;
 
 list_of_variable_decl_assignments
@@ -624,13 +751,14 @@ list_of_variable_assignments
     ;
 
 variable_assignment
-    : variable_lvalue ASSIGN_EQ expression  // 阻塞赋值
-    | variable_lvalue ASSIGN_LE expression  // 非阻塞赋值
+    : variable_lvalue ASSIGN_EQ expression  // Blocking assignment in assignment list
+    | variable_lvalue ASSIGN_LE expression  // Non-blocking assignment in assignment list
     ;
 
-/* ================================================================================================  */
-/*                                 时序控制（IEEE 1364-2005 第9.7节）                                 */
-/* ================================================================================================  */
+//===========================================================================//
+// 时序控制 (Timing Control) - IEEE 1364-2005 Section 9.7
+// 延迟和事件控制。
+//===========================================================================//
 delay_or_event_control
     : delay_control
     | event_control
@@ -638,102 +766,100 @@ delay_or_event_control
     ;
 
 delay_control
-    : HASH delay_value
-    | HASH LPAREN mintypmax_expression RPAREN
-    | ARROW delay_value
-    | ARROW_ARROW delay_value
+    : HASH delay_value // #delay_value
+    | HASH LPAREN mintypmax_expression RPAREN // # (min:typ:max)
+    | ARROW delay_value // ->delay_value (SystemVerilog delay)
+    | ARROW_ARROW delay_value // =>delay_value (SystemVerilog delay)
     ;
 
-gate_instantiation
-    : gate_type (drive_strength)? (delay3)? gate_instance (COMMA gate_instance)* SEMI
-    ;
-
-delay3
-    : HASH delay_value
-    | HASH LPAREN mintypmax_expression (COMMA mintypmax_expression (COMMA mintypmax_expression)?)? RPAREN
-    | ARROW delay_value
-    | ARROW_ARROW LPAREN delay_value COMMA delay_value RPAREN
+delay_value
+    : NUMBER
+    | identifier
     ;
 
 event_control
-    : AT LPAREN event_expression RPAREN
-    | AT STAR
-    | AT LPAREN STAR RPAREN
+    : AT LPAREN event_expression RPAREN // @ (event_expression)
+    | AT STAR // @* (all sensitivity)
+    | AT LPAREN STAR RPAREN // @(*) (all sensitivity)
     ;
 
 event_expression
-    : expression
-    | hierarchical_event_identifier
-    | POSEDGE expression
-    | NEGEDGE expression
-    | event_expression OR event_expression
-    | event_expression COMMA event_expression
+    : expression // Signal change
+    | hierarchical_event_identifier // Event trigger
+    | POSEDGE expression // Rising edge
+    | NEGEDGE expression // Falling edge
+    | event_expression OR event_expression // OR events
+    | event_expression COMMA event_expression // Comma implies OR
     ;
 
 hierarchical_event_identifier
     : ( identifier ( bit_select )? DOT )* event_identifier
     ;
 
-/* ================================================================================================  */
-/*                                     IEEE 1364-2005 第4章 表达式                                    */
-/* ================================================================================================  */
-constant_expression
+//===========================================================================//
+// 表达式 (Expression) - IEEE 1364-2005 Section 4
+// 定义各种表达式的语法。
+//===========================================================================//
+constant_expression // Subset of expression that must be constant
     : constant_primary
     | unary_operator constant_primary
     | constant_expression binary_operator constant_expression
     | constant_expression QUESTION constant_expression COLON constant_expression
+    | LPAREN constant_expression RPAREN
     ;
 
 unary_operator
-    : PLUS          // +
-    | MINUS         // -
-    | BANG          // !
-    | BIT_NOT       // ~
-    | AND           // &
-    | NAND          // ~&
-    | OR            // |
-    | NOR           // ~|
-    | XOR           // ^
-    | XNOR          // ~^ 或 ^~
-    ;       
+    : PLUS          // + (unary plus)
+    | MINUS         // - (unary minus)
+    | BANG          // ! (logical not)
+    | BIT_NOT       // ~ (bitwise not)
+    | AND           // & (bitwise AND reduction)
+    | NAND          // ~& (bitwise NAND reduction)
+    | OR            // | (bitwise OR reduction)
+    | NOR           // ~| (bitwise NOR reduction)
+    | XOR           // ^ (bitwise XOR reduction)
+    | XNOR          // ~^ or ^~ (bitwise XNOR reduction)
+    ;
 
-binary_operator     
-    : PLUS          // +
-    | MINUS         // -
-    | STAR          // *
-    | DIV           // /
-    | MOD           // %
-    | LOG_EQ        // ==
-    | LOG_NEQ       // !=
-    | CASE_EQ       // ===
-    | CASE_NEQ      // !==
-    | AND           // &
-    | OR            // |
-    | XOR           // ^
-    | LOG_AND       // &&
-    | LOG_OR        // ||
-    | LEFT_SHIFT    // <<
-    | RIGHT_SHIFT   // >>
-    | LESS          // <
-    | LESS_EQ       // <=
-    | GREATER       // >
-    | GREATER_EQ    // >=
+binary_operator
+    : PLUS          // + (addition)
+    | MINUS         // - (subtraction)
+    | STAR          // * (multiplication)
+    | DIV           // / (division)
+    | MOD           // % (modulo)
+    | LOG_EQ        // == (logical equality)
+    | LOG_NEQ       // != (logical inequality)
+    | CASE_EQ       // === (case equality)
+    | CASE_NEQ      // !== (case inequality)
+    | AND           // & (bitwise AND)
+    | OR            // | (bitwise OR)
+    | XOR           // ^ (bitwise XOR)
+    | LOG_AND       // && (logical AND)
+    | LOG_OR        // || (logical OR)
+    | LEFT_SHIFT    // << (left shift)
+    | RIGHT_SHIFT   // >> (right shift)
+    | LESS          // < (less than)
+    | LESS_EQ       // <= (less than or equal to)
+    | GREATER       // > (greater than)
+    | GREATER_EQ    // >= (greater than or equal to)
     ;
 
 constant_primary
-    : number
-    | parameter_identifier ( LBRACK constant_range_expression RBRACK )?
+    : NUMBER
+    | parameter_identifier ( LBRACK constant_range_expression RBRACK )? // Parameter access
     | constant_concatenation
     | constant_function_call
     | LPAREN constant_expression RPAREN
     | system_constant
+    | MINUS NUMBER // Negative number constant
+    | PLUS NUMBER  // Positive number constant
     ;
 
 constant_range_expression
-    : constant_expression
-    | constant_expression COLON constant_expression
-    | constant_expression PLUS_COLON constant_expression
-    | constant_expression MINUS_COLON constant_expression
+    : constant_expression // Single bit or index
+    | constant_expression COLON constant_expression // Range [msb:lsb]
+    | constant_expression PLUS_COLON constant_expression // Indexed part-select [index +: width]
+    | constant_expression MINUS_COLON constant_expression // Indexed part-select [index -: width]
     ;
 
 constant_concatenation
@@ -746,40 +872,36 @@ constant_multi_concatenation
     ;
 
 constant_function_call
-    : function_identifier ( attribute_instance )* 
+    : function_identifier ( attribute_instance )*
       LPAREN ( constant_expression ( COMMA constant_expression )* )? RPAREN
     ;
 
-function_identifier
-    : hierarchical_identifier
+system_constant // SystemVerilog specific constants like '1'b1, '0'
+    : SINGLE_QUOTE BINARY_VALUE // '1'b1, '0'
+    | TICK identifier // 'identifier (SV macro evaluation?)
     ;
 
-system_constant
-    : TICK identifier
-    SINGLE_QUOTE BINARY_VALUE
-    ;
-/* ================================================================================================  */
-/*                                             Expression                                            */
-/* ================================================================================================  */
+// General expression (can include variables, function calls, etc.)
 expression
     : primary
-    | unary_operator ( attribute_instance )* primary
-    | expression ( attribute_instance )* binary_operator ( attribute_instance )* expression
-    | expression ( attribute_instance )* QUESTION ( attribute_instance )* expression COLON expression
+    | unary_operator ( attribute_instance )* expression // Unary op applies to expression
+    | expression ( attribute_instance )* binary_operator ( attribute_instance )* expression // Binary op between expressions
+    | expression ( attribute_instance )* QUESTION ( attribute_instance )* expression COLON expression // Ternary op
     | LPAREN expression RPAREN
-    | STRING  // 新增字符串支持（标准第3.6节）
+    | STRING  // String literal
     ;
 
 primary
-    : number
-    | identifier
-    | identifier LBRACK range_expression RBRACK
-    | concatenation_expression      // 表达式上下文使用
+    : NUMBER
+    | identifier ( LBRACK range_expression RBRACK )? // Variable access with optional select/range
+    | concatenation_expression
     | multiple_concatenation
     | function_call
     | system_function_call
-    | constant_function_call
+    | constant_function_call // Constant functions can be used in non-constant contexts
     | LPAREN mintypmax_expression RPAREN
+    | MINUS NUMBER // Negative number primary
+    | PLUS NUMBER  // Positive number primary
     ;
 
 concatenation_expression
@@ -787,20 +909,20 @@ concatenation_expression
     ;
 
 multiple_concatenation
-    : LBRACE expression concatenation RBRACE
-    ;
-
-concatenation_lvalue
-    : LBRACE variable_lvalue ( COMMA variable_lvalue )* RBRACE
+    : LBRACE expression concatenation_expression RBRACE // { replication_constant { expression, ...} }
     ;
 
 function_call
-    : function_identifier ( attribute_instance )* 
+    : function_identifier ( attribute_instance )*
       LPAREN ( expression ( COMMA expression )* )? RPAREN
     ;
 
+function_identifier
+    : hierarchical_identifier
+    ;
+
 system_function_call
-    : system_identifier ( attribute_instance )* 
+    : system_identifier ( attribute_instance )*
       LPAREN ( expression ( COMMA expression )* )? RPAREN
     ;
 
@@ -809,16 +931,13 @@ system_identifier
     ;
 
 mintypmax_expression
-    : expression ( COLON expression COLON expression )?
+    : expression ( COLON expression COLON expression )? // min:typ:max
     ;
 
-/* IEEE 1364-2005 第5章 调度语义 */
-// (已通过事件控制表达式实现)
-// 数据类型（IEEE 1364-2005 第3.2节）
-
-/* ================================================================================================  */
-/*                                      IEEE 1364-2005 第6章 赋值                                     */
-/* ================================================================================================  */
+//===========================================================================//
+// 连续赋值 (Continuous Assignment) - IEEE 1364-2005 Section 6
+// assign 语句。
+//===========================================================================//
 continuous_assign
     : ASSIGN ( drive_strength )? ( delay )? list_of_net_assignments SEMI
     ;
@@ -832,50 +951,69 @@ net_assignment
     ;
 
 net_lvalue
-    : hierarchical_net_identifier ( LBRACK constant_expression RBRACK )?
-    | LBRACE net_lvalue ( COMMA net_lvalue )* RBRACE
+    : hierarchical_net_identifier ( LBRACK constant_expression RBRACK )? // Bit/part-select on net
+    | LBRACE net_lvalue ( COMMA net_lvalue )* RBRACE // Concatenation lvalue for nets
     ;
 
 hierarchical_net_identifier
     : ( identifier DOT )* identifier
     ;
 
-/* ================================================================================================  */
-/*                                    IEEE 1364-2005 第7章 门级建模                                   */
-/* ================================================================================================  */
+//===========================================================================//
+// 门级实例化 (Gate Instantiation) - IEEE 1364-2005 Section 7
+// 例化基本门原语。
+//===========================================================================//
+gate_instantiation
+    : gate_type (drive_strength)? (delay3)? gate_instance (COMMA gate_instance)* SEMI
+    ;
+
+delay
+    : HASH delay_value
+    | HASH LPAREN mintypmax_expression ( COMMA mintypmax_expression ( COMMA mintypmax_expression )? )? RPAREN
+    ;
+
+delay3
+    : HASH delay_value // #delay
+    | HASH LPAREN mintypmax_expression (COMMA mintypmax_expression (COMMA mintypmax_expression)?)? RPAREN // # (d1), # (d1,d2), # (d1,d2,d3)
+    | ARROW delay_value // ->delay (SystemVerilog delay)
+    | ARROW_ARROW LPAREN delay_value COMMA delay_value RPAREN // => (d1,d2) (SystemVerilog delay)
+    ;
+
 gate_instance
     : ( name_of_gate_instance )? LPAREN terminal ( COMMA terminal )* RPAREN
     ;
 
 name_of_gate_instance
-    : identifier range?
+    : identifier range? // Instance array optional range
     ;
 
-gate_type
+gate_type // Subset of common gate types
     : AND | NAND | OR | NOR | XOR | XNOR
     | BUF | NOT | BUFIF0 | BUFIF1 | NOTIF0 | NOTIF1
     | NMOS | PMOS | RNMOS | RPMOS | TRAN | RTRAN
     ;
 
-terminal
+terminal // Input/output terminal connection for gates/udps
     : expression
     ;
 
-/* ================================================================================================  */
-/*                                  IEEE 1364-2005 第8章 用户定义原语                                 */
-/* ================================================================================================  */
+//===========================================================================//
+// 用户定义原语实例化 (UDP Instantiation) - IEEE 1364-2005 Section 8
+// 例化用户定义原语。
+//===========================================================================//
 
 udp_instantiation
     : udp_identifier ( drive_strength )? ( delay )? udp_instance ( COMMA udp_instance )* SEMI
     ;
 
 udp_instance
-    : ( name_of_instance )? LPAREN terminal ( COMMA terminal )* RPAREN
+    : ( name_of_instance )? LPAREN terminal ( COMMA terminal )* RPAREN // name_of_instance already includes optional range
     ;
 
-/* ================================================================================================  */
-/*                                    IEEE 1364-2005 第9章 行为建模                                   */
-/* ================================================================================================  */
+//===========================================================================//
+// 行为建模 (Behavioral Modeling) - IEEE 1364-2005 Section 9
+// initial 和 always 块，以及内部语句。
+//===========================================================================//
 
 initial_construct
     : INITIAL statement_or_null
@@ -887,25 +1025,30 @@ always_construct
 
 statement_or_null
     : statement
-    | SEMI
+    | SEMI // Empty statement
     ;
 
-statement
+//===========================================================================//
+// 过程语句 (Procedural Statements) - IEEE 1364-2005 Section 9
+// 过程块内的各种语句类型。
+//===========================================================================//
+statement // Note: statement itself is often a flat list of options
     : blocking_assignment SEMI
     | non_blocking_assignment SEMI
-    | procedural_continuous_assignments SEMI
+    | procedural_continuous_assignments SEMI // assign, deassign, force, release
     | case_statement
     | conditional_statement
     | loop_statement
-    | wait_statement
-    | disable_statement
+    | wait_statement SEMI // wait statement needs SEMI
+    | disable_statement SEMI // disable statement needs SEMI
     | event_trigger SEMI
     | seq_block
     | par_block
-    | task_enable
-    | system_task_enable SEMI
+    | task_enable SEMI // task calls need SEMI
+    | system_task_enable // System task calls include SEMI
     ;
 
+// Procedural continuous assignments (assign, deassign, force, release within blocks)
 procedural_continuous_assignments
     : assign_statement
     | deassign_statement
@@ -913,11 +1056,12 @@ procedural_continuous_assignments
     | release_statement
     ;
 
-assign_statement    : ASSIGN variable_assignment ;
+assign_statement    : ASSIGN variable_assignment ; // variable_assignment includes = or <=
 deassign_statement  : DEASSIGN variable_lvalue ;
-force_statement     : FORCE (variable_assignment | net_assignment) ;
-release_statement   : RELEASE (variable_lvalue | net_lvalue) ;
+force_statement     : FORCE (variable_assignment | net_assignment) ; // Can force reg or net
+release_statement   : RELEASE (variable_lvalue | net_lvalue) ; // Can release reg or net
 
+// Case statements (case, casez, casex)
 case_statement
     : CASE LPAREN expression RPAREN
         case_item+
@@ -935,8 +1079,8 @@ case_item
     | DEFAULT (COLON)? statement_or_null
     ;
 
-wait_statement  : WAIT LPAREN expression RPAREN statement_or_null ;
-event_trigger   : ( ARROW | ARROW_ARROW ) hierarchical_event_identifier ;
+wait_statement  : WAIT LPAREN expression RPAREN statement_or_null ; // Wait for condition
+event_trigger   : ( ARROW | ARROW_ARROW ) hierarchical_event_identifier ; // Trigger event
 
 hierarchical_task_identifier
     : hierarchical_identifier
@@ -945,53 +1089,60 @@ hierarchical_task_identifier
 hierarchical_block_identifier
     : hierarchical_identifier
     ;
+
+// Sequential block (begin/end)
 seq_block
-    : BEGIN ( COLON identifier )? 
-      block_item_declaration* 
-      statement* 
+    : BEGIN ( COLON identifier )? // Optional named block
+      block_item_declaration* // Declarations within the block
+      statement* // Statements within the block
     END
     ;
 
+// Parallel block (fork/join)
 par_block
-    : FORK ( COLON identifier )?
-      block_item_declaration*
-      statement*
+    : FORK ( COLON identifier )? // Optional named block
+      block_item_declaration* // Declarations within the block
+      statement* // Statements within the block
     JOIN
     ;
 
+// Declarations allowed within a block (begin/end or fork/join)
 block_item_declaration
-    : parameter_declaration
-    | reg_declaration
-    | integer_declaration
-    | real_declaration
-    | time_declaration
-    | event_declaration
-    | local_parameter_declaration
+    : parameter_declaration // Includes SEMI
+    | reg_declaration // Includes SEMI
+    | integer_declaration // Includes SEMI
+    | real_declaration // Includes SEMI
+    | time_declaration // Includes SEMI
+    | event_declaration // Includes SEMI
+    | local_parameter_declaration // Includes SEMI
+    | realtime_declaration SEMI // Need to add SEMI here
     ;
 
-task_enable : hierarchical_task_identifier ( LPAREN ( expression ( COMMA expression )* )? RPAREN )? ;
+// Task and system task calls
+task_enable : hierarchical_task_identifier ( LPAREN ( expression ( COMMA expression )* )? RPAREN )? ; // Task call
 system_task_enable
-    : system_task_identifier ( LPAREN task_arg_list? RPAREN )? SEMI
+    : system_task_identifier ( LPAREN task_arg_list? RPAREN )? SEMI // System task call includes SEMI
     ;
 
 system_task_identifier
     : DOLLAR identifier
     ;
 
-task_arg_list
-    : expression ( COMMA expression )*
-    | named_parameter_assignment ( COMMA named_parameter_assignment )*
+task_arg_list // Arguments for tasks
+    : expression ( COMMA expression )* // Ordered arguments
+    | named_parameter_assignment ( COMMA named_parameter_assignment )* // Named arguments (SystemVerilog feature, but often supported)
     ;
 
-/* ================================================================================================  */
-/*                                  IEEE 1364-2005 第10章 任务和函数                                  */
-/* ================================================================================================  */
+//===========================================================================//
+// 任务和函数 (Tasks and Functions) - IEEE 1364-2005 Section 10
+// 定义任务和函数。
+//===========================================================================//
 
 task_declaration
-    : TASK lifetime? task_identifier SEMI
-      tf_port_declaration*
-      task_item_declaration*
-      statement_or_null*
+    : TASK lifetime? task_identifier SEMI // Task header
+      tf_port_declaration* // Task/function ports
+      task_item_declaration* // Declarations within task
+      statement_or_null* // Statements in task body
       ENDTASK
     ;
 
@@ -1004,50 +1155,55 @@ task_identifier
     : identifier
     ;
 
-tf_port_declaration
-    : port_direction range? list_of_port_identifiers SEMI
+tf_port_declaration // Task/function port declaration
+    : port_direction range? list_of_port_identifiers SEMI // input/output/inout var declaration
+    | port_direction list_of_port_identifiers SEMI // input/output/inout simple var
+    | range? list_of_port_identifiers SEMI // Implicit direction (input default)
+    | list_of_port_identifiers SEMI // Implicit direction, no range
     ;
 
-task_item_declaration
-    : block_item_declaration
-    | tf_port_declaration
-    ;
+task_item_declaration // Declarations allowed within task/function
+    : block_item_declaration // Parameter, reg, int, real, time, event, localparam
+    | tf_port_declaration // Port declarations (redundant? Ports are declared using tf_port_declaration list above)
+    ; // Note: Standard says 'tf_item_declaration' includes 'block_item_declaration' and 'tf_port_declaration'.
+      // The structure above seems to correctly represent this by having tf_port_declaration listed in the header
+      // and tf_item_declaration (using block_item_declaration) inside the body.
 
 function_declaration
-    : FUNCTION lifetime? function_data_type? function_identifier SEMI
-      function_item_declaration*
-      statement_or_null*
+    : FUNCTION lifetime? function_data_type? function_identifier SEMI // Function header
+      tf_port_declaration* // Function ports (must be input or inout, output is return value)
+      function_item_declaration* // Declarations within function
+      statement_or_null* // Statements in function body
       ENDFUNCTION
     ;
 
-function_data_type
+function_data_type // Function return type
     : integer_type
     | real_type
-    | range              // 位宽声明
+    | time_type
+    | range              // Bit width declaration (e.g., function [7:0] func_name;)
     ;
 
-function_item_declaration
-    : block_item_declaration
-    | tf_port_declaration
-    ;
+function_item_declaration // Declarations allowed within function (subset of task_item_declaration)
+    : block_item_declaration // Parameter, reg, int, real, time, event, localparam
+    | tf_port_declaration // Ports (redundant here too, see task_item_declaration note)
+    ; // Note: Function items usually exclude task/function declarations and certain other items allowed in tasks.
+      // This grammar uses block_item_declaration which seems correct for common usage.
 
-/* ================================================================================================  */
-/*                                     IEEE 1364-2005 第11章 禁用                                     */
-/* ================================================================================================  */
+//===========================================================================//
+// 禁用语句 (Disable Statement) - IEEE 1364-2005 Section 11
+// 禁用任务或块。
+//===========================================================================//
 
 disable_statement
     : DISABLE hierarchical_task_identifier SEMI
     | DISABLE hierarchical_block_identifier SEMI
     ;
 
-/* 补充基础规则 */
-number
-    : NUMBER
-    ;
-
-/* ================================================================================================  */
-/*                                    IEEE 1364-2005 第14章 指定块                                    */
-/* ================================================================================================  */
+//===========================================================================//
+// 指定块 (Specify Block) - IEEE 1364-2005 Section 14
+// 声明模块的延迟和时序检查。
+//===========================================================================//
 
 specify_block
     : SPECIFY
@@ -1055,85 +1211,18 @@ specify_block
       ENDSPECIFY
     ;
 
+// 项
 specify_item
-    : specparam_declaration
-    | path_declaration
-    | system_timing_check
-    | state_dependent_path_declaration  
-    | polarity_operator_declaration    
+    : specparam_declaration // Includes SEMI
+    | path_declaration // simple or edge-sensitive
+    | system_timing_check // Includes SEMI
+    | state_dependent_path_declaration // Needs to be handled by path_declaration rules
+    | polarity_operator_declaration // This rule seems non-standard as a top-level item. Polarity is part of path description. Removing.
     ;
 
+// Specparam declaration
 specparam_declaration
     : SPECPARAM list_of_specparam_assignments SEMI
-    ;
-
-path_declaration
-    : simple_path_declaration
-    | edge_sensitive_path_declaration
-    | state_dependent_path_declaration
-    ;
-
-system_timing_check
-    : DOLLAR_SETUP timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
-    | DOLLAR_HOLD timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
-    | DOLLAR_WIDTH timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
-    | DOLLAR_RECOVERY timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
-    | DOLLAR_SKEW timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
-    ;
-
-timing_check_event
-    : (edge_control)? module_path_expression (AND3 timing_check_condition)?
-    ;
-
-edge_control
-    : POSEDGE | NEGEDGE
-    ;
-
-module_path_expression
-    : module_path_primary
-    | unary_module_path_operator module_path_primary
-    | module_path_expression binary_module_path_operator module_path_expression
-    ;
-
-module_path_primary
-    : number
-    | identifier
-    | LPAREN module_path_expression RPAREN
-    ;
-
-unary_module_path_operator
-    : LOG_NOT | BIT_NOT | BIT_AND | REDUCE_NAND | BIT_OR | REDUCE_NOR | BIT_XOR | BIT_XNOR
-    ;
-
-binary_module_path_operator
-    : LOG_EQ | LOG_NEQ | LOG_AND | LOG_OR 
-    | BIT_AND | BIT_OR | BIT_XOR | BIT_XNOR
-    | RIGHT_SHIFT | LEFT_SHIFT | SHRA | SHLA
-    | PLUS | MINUS | STAR | DIV | MOD
-    ;
-
-timing_check_condition
-    : simple_expression
-    | BIT_NOT simple_expression
-    ;
-
-simple_expression
-    : identifier
-    | LPAREN expression RPAREN
-    ;
-
-timing_check_limit
-    : constant_expression
-    | constant_mintypmax_expression
-    ;
-
-constant_mintypmax_expression
-    : constant_expression ( COLON constant_expression COLON constant_expression )?
-    ;
-
-notifier_control
-    : identifier
-    | hierarchical_identifier
     ;
 
 list_of_specparam_assignments
@@ -1141,31 +1230,107 @@ list_of_specparam_assignments
     ;
 
 specparam_assignment
-    : identifier ASSIGN_EQ constant_expression
-    | identifier ASSIGN_EQ constant_mintypmax_expression
+    : identifier ASSIGN_EQ constant_expression // Simple value
+    | identifier ASSIGN_EQ constant_mintypmax_expression // Min:Typ:Max value
     ;
 
-/* ================================================================================================  */
-/*                                      simple_path_declaration                                      */
-/* ================================================================================================  */
+// Path declaration (simple or edge-sensitive)
+path_declaration
+    : simple_path_declaration // Includes ASSIGN_EQ and path_delay_value
+    | edge_sensitive_path_declaration // Includes ASSIGN_EQ and path_delay_value
+    | state_dependent_path_declaration // Includes ASSIGN_EQ and path_delay_value
+    ;
 
+// Simple path (parallel or full)
 simple_path_declaration
-    : parallel_path_description ASSIGN_EQ path_delay_value
-    | full_path_description ASSIGN_EQ path_delay_value
+    : parallel_path_description ASSIGN_EQ path_delay_value SEMI // Added SEMI
+    | full_path_description ASSIGN_EQ path_delay_value SEMI // Added SEMI
     ;
 
+// Parallel path description (|=>)
 parallel_path_description
-    : LPAREN specify_input_terminal_descriptor ( polarity_operator )? IMPLIES 
+    : LPAREN specify_input_terminal_descriptor ( polarity_operator )? IMPLIES
       specify_output_terminal_descriptor RPAREN
     ;
 
+// Full path description (*>)
 full_path_description
     : LPAREN list_of_path_inputs ( polarity_operator )? STAR_GT list_of_path_outputs RPAREN
     ;
 
+// Edge-sensitive path (=>)
+edge_sensitive_path_declaration
+    : IF LPAREN conditional_port_expression RPAREN path_description ASSIGN_EQ path_delay_value SEMI // Added SEMI
+    | IFNONE path_description ASSIGN_EQ path_delay_value SEMI // Added SEMI
+    ;
+
+// Conditional expression for state-dependent paths
+conditional_port_expression
+    : port_expression
+    | LOG_NOT port_expression
+    | port_expression LOG_EQ scalar_constant
+    | port_expression CASE_EQ scalar_constant
+    ;
+
+// Path description (used in edge-sensitive paths)
+path_description
+    : parallel_edge_sensitive_path_description
+    | full_edge_sensitive_path_description
+    ;
+
+// Parallel edge-sensitive path description (|=>)
+parallel_edge_sensitive_path_description
+    : LPAREN edge_identifier? specify_input_terminal_descriptor IMPLIES
+      LPAREN specify_output_terminal_descriptor polarity_operator? COLON data_source_expression RPAREN RPAREN
+    ;
+
+// Full edge-sensitive path description (*>)
+full_edge_sensitive_path_description
+    : LPAREN edge_identifier? list_of_path_inputs STAR_GT
+      LPAREN list_of_path_outputs polarity_operator? COLON data_source_expression RPAREN RPAREN
+    ;
+
+edge_identifier
+    : POSEDGE
+    | NEGEDGE
+    ;
+
+data_source_expression
+    : port_expression // Expression driving the output terminal
+    ;
+
+scalar_constant // Single bit constant for comparisons
+    : SCALAR_CONSTANT // 1'b0, 1'b1, 1'B0, 1'B1
+    | BINARY_CONSTANT // 0, 1 (assuming context implies scalar)
+    ;
+
+// State-dependent path (if/ifnone with simple or edge-sensitive path)
+state_dependent_path_declaration
+    : IF LPAREN module_path_expression RPAREN simple_path_declaration // simple_path_declaration includes SEMI
+    | IF LPAREN module_path_expression RPAREN edge_sensitive_path_declaration // edge_sensitive_path_declaration includes SEMI
+    | IFNONE simple_path_declaration // simple_path_declaration includes SEMI
+    ;
+
+polarity_operator_declaration
+    : POSEDGE path_description ASSIGN_EQ path_delay_value
+    | NEGEDGE path_description ASSIGN_EQ path_delay_value
+    ;
+
+// Polarity operator declaration (This seems like a misinterpretation of the standard. Polarity is part of the path description.)
+// Removed: polarity_operator_declaration: POSEDGE path_description ASSIGN_EQ path_delay_value | NEGEDGE path_description ASSIGN_EQ path_delay_value ;
+
+// Path delay value
 path_delay_value
-    : list_of_path_delay_expressions
-    | LPAREN list_of_path_delay_expressions RPAREN
+    : list_of_path_delay_expressions // list is often 1, 2, 3, 6, or 12 values
+    | LPAREN list_of_path_delay_expressions RPAREN // Optional parentheses
+    ;
+
+list_of_path_delay_expressions
+    : path_delay_expression ( COMMA path_delay_expression )*
+    ;
+
+path_delay_expression
+    : constant_mintypmax_expression // Each delay value can be min:typ:max
     ;
 
 specify_input_terminal_descriptor
@@ -1194,93 +1359,96 @@ list_of_path_outputs
     : specify_output_terminal_descriptor ( COMMA specify_output_terminal_descriptor )*
     ;
 
-list_of_path_delay_expressions
-    : path_delay_expression ( COMMA path_delay_expression )*
-    ;
-
-path_delay_expression
-    : constant_mintypmax_expression
-    ;
-
-polarity_operator
+polarity_operator // + or - in path description
     : PLUS
     | MINUS
     ;
 
-/* ================================================================================================  */
-/*                                  edge_sensitive_path_declaration                                  */
-/* ================================================================================================  */
-
-edge_sensitive_path_declaration
-    : IF LPAREN conditional_port_expression RPAREN path_description ASSIGN_EQ path_delay_value
-    | IFNONE path_description ASSIGN_EQ path_delay_value
+// System timing checks ($setup, $hold, etc.)
+system_timing_check
+    : DOLLAR_SETUP timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | DOLLAR_HOLD timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | DOLLAR_WIDTH timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | DOLLAR_RECOVERY timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | DOLLAR_SKEW timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI
+    | DOLLAR_TIMESKEW timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI // Added timeskew
+    | DOLLAR_FULLSKEW timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI // Added fullskew
+    | DOLLAR_PERIOD timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI // Added period
+    | DOLLAR_NOCHANGE timing_check_event COMMA timing_check_event COMMA timing_check_limit (LBRACK notifier_control RBRACK)? SEMI // Added nochange
     ;
 
-conditional_port_expression
-    : port_expression
-    | LOG_NOT port_expression
-    | port_expression LOG_EQ scalar_constant
-    | port_expression CASE_EQ scalar_constant
+timing_check_event
+    : (edge_control)? module_path_expression (AND3 timing_check_condition)?
     ;
 
-path_description
-    : parallel_edge_sensitive_path_description
-    | full_edge_sensitive_path_description
+edge_control
+    : POSEDGE | NEGEDGE // 0, 1, x, z (from standard) represented by SPECIFY_INPUT_LEVEL token
     ;
 
-parallel_edge_sensitive_path_description
-    : LPAREN edge_identifier? specify_input_terminal_descriptor IMPLIES 
-      LPAREN specify_output_terminal_descriptor polarity_operator? COLON data_source_expression RPAREN RPAREN
+module_path_expression // Expression used in specify blocks
+    : module_path_primary
+    | unary_module_path_operator module_path_primary
+    | module_path_expression binary_module_path_operator module_path_expression
+    | LPAREN module_path_expression RPAREN
     ;
 
-full_edge_sensitive_path_description
-    : LPAREN edge_identifier? list_of_path_inputs STAR_GT 
-      LPAREN list_of_path_outputs polarity_operator? COLON data_source_expression RPAREN RPAREN
+module_path_primary
+    : NUMBER
+    | identifier ( LBRACK constant_expression RBRACK )? // Identifier with bit/part-select
     ;
 
-edge_identifier
-    : POSEDGE
-    | NEGEDGE
+unary_module_path_operator
+    : LOG_NOT | BIT_NOT | BIT_AND | REDUCE_NAND | BIT_OR | REDUCE_NOR | BIT_XOR | BIT_XNOR
     ;
 
-data_source_expression
-    : port_expression
+binary_module_path_operator
+    : LOG_EQ | LOG_NEQ | LOG_AND | LOG_OR
+    | BIT_AND | BIT_OR | BIT_XOR | BIT_XNOR
+    | LEFT_SHIFT | RIGHT_SHIFT | SHRA | SHLA
+    | PLUS | MINUS | STAR | DIV | MOD
     ;
 
-scalar_constant
-    : SCALAR_CONSTANT
-    | BINARY_CONSTANT
+timing_check_condition // Condition for timing checks
+    : simple_expression
+    | BIT_NOT simple_expression
     ;
 
-/* ================================================================================================  */
-/*                                  state_dependent_path_declaration                                 */
-/* ================================================================================================  */
-
-state_dependent_path_declaration
-    : IF LPAREN module_path_expression RPAREN simple_path_declaration
-    | IF LPAREN module_path_expression RPAREN edge_sensitive_path_declaration
-    | IFNONE simple_path_declaration
+simple_expression // Identifier or parenthesized expression
+    : identifier ( LBRACK constant_expression RBRACK )? // Identifier with optional bit/part-select
+    | LPAREN expression RPAREN
     ;
 
-polarity_operator_declaration
-    : POSEDGE path_description ASSIGN_EQ path_delay_value
-    | NEGEDGE path_description ASSIGN_EQ path_delay_value
+timing_check_limit // Limit value for timing checks
+    : constant_expression
+    | constant_mintypmax_expression
     ;
 
-/* ================================================================================================  */
-/*                                          net_declaration                                          */
-/* ================================================================================================  */
+constant_mintypmax_expression
+    : constant_expression ( COLON constant_expression COLON constant_expression )?
+    ;
+
+notifier_control // Optional notifier signal for timing checks
+    : identifier
+    | hierarchical_identifier
+    ;
+
+//===========================================================================//
+// 网线声明 (Net Declaration) - IEEE 1364-2005 Section 3.2
+// 声明各种类型的网线。
+//===========================================================================//
 
 net_declaration
-    : net_type ( drive_strength )? 
-      ( VECTORED | SCALARED )?
+    : net_type ( drive_strength )?
+      ( VECTORED | SCALARED )? // Optional keywords
       ( SIGNED )?
+      ( range )? // Range before delay
       ( delay )?
-      list_of_net_identifiers SEMI
-    | net_type ( drive_strength )?
-      ( SIGNED )?
-      ( delay )?
-      list_of_net_decl_assignments SEMI
+      list_of_net_identifiers_or_assignments SEMI
+    ;
+
+list_of_net_identifiers_or_assignments
+    : list_of_net_identifiers
+    | list_of_net_decl_assignments
     ;
 
 list_of_net_identifiers
@@ -1288,7 +1456,7 @@ list_of_net_identifiers
     ;
 
 net_identifier
-    : identifier ( range )?
+    : identifier ( range )? // Net name with optional range
     ;
 
 list_of_net_decl_assignments
@@ -1296,19 +1464,20 @@ list_of_net_decl_assignments
     ;
 
 net_decl_assignment
-    : identifier ( range )? ASSIGN_EQ expression
+    : identifier ( range )? ASSIGN_EQ expression // Net assignment during declaration
     ;
 
-/* ================================================================================================  */
-/*                                              变量声明                                              */
-/* ================================================================================================  */
+//===========================================================================//
+// 变量声明 (Variable Declaration) - IEEE 1364-2005 Section 3.3
+// 声明各种类型的变量 (reg, integer, real, time)。
+//===========================================================================//
 
 reg_declaration
-    : REG ( range )? list_of_variable_identifiers SEMI
+    : REG ( SIGNED )? ( range )? list_of_variable_identifiers SEMI
     ;
 
 integer_declaration
-    : INTEGER list_of_variable_identifiers SEMI
+    : INTEGER ( range )? list_of_variable_identifiers SEMI // Integer can have range in SV
     ;
 
 real_declaration
@@ -1316,7 +1485,7 @@ real_declaration
     ;
 
 time_declaration
-    : TIME list_of_variable_identifiers SEMI
+    : TIME ( range )? list_of_variable_identifiers SEMI // Time can have range in SV
     ;
 
 realtime_declaration
@@ -1333,36 +1502,38 @@ list_of_real_identifiers
     ;
 
 variable_identifier
-    : identifier ( range )?
+    : identifier ( range )? // Variable name with optional range
     ;
 
 real_identifier
     : identifier
     ;
 
-// 标识符系统（IEEE 1364-2005 第3.9节）
+//===========================================================================//
+// 标识符系统 (Identifier System) - IEEE 1364-2005 Section 3.9
+// 定义各种上下文中的标识符。
+//===========================================================================//
 module_identifier
     : identifier
-    ;
-
-// 基础标识符规则（需确保已存在）
-identifier
-    : SIMPLE_IDENTIFIER
-    | ESCAPED_IDENTIFIER
     ;
 
 port_identifier
     : identifier
     ;
 
-// 驱动强度（IEEE 1364-2005 第3.2.1节）
+// 基础标识符规则 (Assumed from Lexer)
+identifier
+    : SIMPLE_IDENTIFIER
+    | ESCAPED_IDENTIFIER
+    ;
+
+//===========================================================================//
+// 驱动强度 (Drive Strength) - IEEE 1364-2005 Section 3.2.1
+// 定义网线或门输出的驱动强度。
+//===========================================================================//
 drive_strength
     : LPAREN strength0 COMMA strength1 RPAREN
-    | LPAREN strength1 COMMA strength0 RPAREN
-    | LPAREN strength0 COMMA highz1 RPAREN
-    | LPAREN strength1 COMMA highz0 RPAREN
-    | LPAREN highz0 COMMA strength1 RPAREN
-    | LPAREN highz1 COMMA strength0 RPAREN
+    | LPAREN strength1 COMMA strength0
     ;
 
 strength0
@@ -1371,23 +1542,4 @@ strength0
 
 strength1
     : SUPPLY1 | STRONG1 | PULL1 | WEAK1
-    ;
-
-highz0
-    : HIGHZ0
-    ;
-
-highz1
-    : HIGHZ1
-    ;
-
-// 延迟控制（IEEE 1364-2005 第3.2.2节）
-delay
-    : HASH delay_value
-    | HASH LPAREN mintypmax_expression ( COMMA mintypmax_expression ( COMMA mintypmax_expression )? )? RPAREN
-    ;
-
-delay_value
-    : number
-    | identifier
     ;

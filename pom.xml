@@ -1,11 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.yourcompany</groupId>
+    <groupId>com.adolphwang</groupId>
     <artifactId>verilog-parser</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -14,8 +15,17 @@
         <antlr.version>4.13.2</antlr.version>
     </properties>
 
+    <repositories>
+        <!-- 添加 Sonatype 仓库 -->
+        <repository>
+            <id>sonatype</id>
+            <name>Sonatype Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
-        <!-- ANTLR 核心运行时库（必须） -->
+        <!-- ANTLR 核心运行时库 -->
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
@@ -27,21 +37,28 @@
             <groupId>org.antlr</groupId>
             <artifactId>antlr4</artifactId>
             <version>${antlr.version}</version>
-            <scope>provided</scope>
+            <!-- 移除provided作用域，确保打包 -->
         </dependency>
-
+        
         <!-- GUI支持 -->
         <dependency>
             <groupId>org.abego.treelayout</groupId>
             <artifactId>org.abego.treelayout.core</artifactId>
             <version>1.0.3</version>
         </dependency>
+        
+        <!-- Swing扩展 -->
+        <dependency>
+            <groupId>org.swinglabs.swingx</groupId>
+            <artifactId>swingx-all</artifactId>
+            <version>1.6.4</version>
+        </dependency>
 
     </dependencies>
 
     <build>
         <plugins>
-            <!-- ANTLR 插件 -->
+            <!-- 1. ANTLR 插件 -->
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
@@ -63,38 +80,67 @@
                 </configuration>
             </plugin>
 
-            <!-- 编译器插件 -->
+            <!-- 2. 编译器插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
             </plugin>
 
-            <!-- 新增assembly插件 -->
+            <!-- 3. 禁用默认JAR生成 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.5.0</version>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>verilogparser.Main</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <includeDependencies>true</includeDependencies> <!-- 包含所有依赖 -->
+                    <skip>false</skip>
+                    <forceCreation>true</forceCreation>
                 </configuration>
+            </plugin>
+
+            <!-- 4. 增强版Shade插件配置 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <!-- 关键修改：禁用original文件生成 -->
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>shaded</shadedClassifierName>
+                            
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>verilogparser.Main</mainClass>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>                            
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
+        <finalName>verilog-parser-${project.version}</finalName>
     </build>
 </project>
