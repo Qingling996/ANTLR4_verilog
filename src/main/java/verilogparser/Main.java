@@ -2,88 +2,57 @@ package verilogparser;
 
 import verilog.VerilogLexer;
 import verilog.VerilogParser;
-import verilog.VerilogParserBaseListener;
-
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.gui.TreeViewer;
+
+// 新增的GUI相关导入
+import javax.swing.*;
+import java.awt.*; // 包含GraphicsEnvironment
+import java.util.Arrays; // 新增的Arrays导入
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        // 1. 准备Verilog代码
-        String verilogCode = "module example(input a, output b);\n" +
-                            "  assign b = ~a;\n" +
-                            "endmodule";
+        // String verilogCode = "module example(input a, output b); assign b = ~a; endmodule";
+
+        // 修改为从文件读取（参数传入路径）
+        if (args.length == 0) {
+            System.err.println("Usage: java Main  <file-or-directory>");
+            return;
+        }
+        String filePath = args[0];
+        CharStream input = CharStreams.fromFileName(filePath); // 关键修改
         
-        // 2. 创建输入流
-        CharStream input = CharStreams.fromString(verilogCode);
-        
-        // 3. 创建词法分析器
+        // 解析管道
+        // CharStream input = CharStreams.fromString(verilogCode);
         VerilogLexer lexer = new VerilogLexer(input);
-        
-        // 4. 创建词法符号流
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        
-        // 5. 创建语法分析器
         VerilogParser parser = new VerilogParser(tokens);
-        
-        // 6. 开始解析(从source_text规则开始)
+
+        // 获取语法树
         ParseTree tree = parser.source_text();
-        
-        // 7. 打印解析树
-        System.out.println("=== 基础解析树 ===");
         System.out.println(tree.toStringTree(parser));
-        
-        // 8. 使用详细监听器分析
-        System.out.println("\n=== 语法树详细分析 ===");
-        new ParseTreeWalker().walk(new VerboseListener(), tree);
-        
-        // 9. 使用原始监听器（可选）
-        visualizeParseTree(tree, parser);
-    }
-    
-    // 可视化解析树的辅助方法
-    private static void visualizeParseTree(ParseTree tree, Parser parser) {
-        ParseTreeWalker walker = new ParseTreeWalker();
-        BaseVerilogListener listener = new BaseVerilogListener();
-        walker.walk(listener, tree);
-    }
-    
-    // 基础监听器实现
-    static class BaseVerilogListener extends VerilogParserBaseListener {
-        @Override
-        public void enterModule_declaration(VerilogParser.Module_declarationContext ctx) {
-            System.out.println("[基础监听] 发现模块: " + ctx.module_identifier().getText());
-        }
-        
-        @Override
-        public void enterAssignment(VerilogParser.AssignmentContext ctx) {
-            System.out.println("[基础监听] 发现赋值: " + ctx.getText());
+
+        // 图形化展示
+        if (!GraphicsEnvironment.isHeadless()) {
+            showAST(parser, tree);
         }
     }
-    
-    // 详细监听器实现
-    static class VerboseListener extends VerilogParserBaseListener {
-        private int indent = 0;
+
+    private static void showAST(VerilogParser parser, ParseTree tree) {
+        JFrame frame = new JFrame("Verilog AST");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        private String indent() {
-            return "  ".repeat(indent);
-        }
+        TreeViewer viewer = new TreeViewer(
+            Arrays.asList(parser.getRuleNames()), 
+            tree
+        );
         
-        @Override 
-        public void enterEveryRule(ParserRuleContext ctx) {
-            System.out.println(indent() + "进入规则: " + VerilogParser.ruleNames[ctx.getRuleIndex()]);
-            indent++;
-        }
+        viewer.setScale(1.5);
+        JScrollPane scrollPane = new JScrollPane(viewer);
+        frame.add(scrollPane);
         
-        @Override 
-        public void exitEveryRule(ParserRuleContext ctx) {
-            indent--;
-            System.out.println(indent() + "退出规则: " + VerilogParser.ruleNames[ctx.getRuleIndex()]);
-        }
-        
-        @Override
-        public void visitTerminal(TerminalNode node) {
-            System.out.println(indent() + "终端: " + node.getText());
-        }
+        frame.setSize(800, 600);
+        frame.setVisible(true);
     }
 }

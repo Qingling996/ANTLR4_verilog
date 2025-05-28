@@ -81,6 +81,7 @@ verilog\VerilogParser$StatementContext.class
 verilog\VerilogParser$Gate_typeContext.class
 verilog\VerilogParser$Conditional_port_expressionContext.class
 verilog\VerilogParser$Constant_function_callContext.class
+verilogparser\Main.class
 verilog\VerilogParser$Named_port_connectionContext.class
 verilog\VerilogParser$List_of_defparam_assignmentsContext.class
 verilog\VerilogParser$Case_itemContext.class
