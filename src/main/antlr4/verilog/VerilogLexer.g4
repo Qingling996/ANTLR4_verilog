@@ -165,12 +165,12 @@ SCALAR_CONSTANT
 // 新增十进制基数规则（IEEE 1364-2005 Section 2.5）
 fragment DECIMAL_NUMBER
     : SIZE_DIGIT? '\'' [dD] [0-9xXzZ_]+  // 支持x/z状态和下划线
-    | '\'' [dD]                          // 允许省略位宽的简写格式
+    | '\'' [dD] [0-9xXzZ_]+             // 允许省略位宽的简写格式
     ;
 
 fragment OCTAL_NUMBER
     : SIZE_DIGIT? '\'' [oO] [0-7xXzZ_]+  // 支持x/z状态和下划线
-    | '\'' [oO]                          // 允许省略位宽的简写格式
+    | '\'' [oO] [0-7xXzZ_]+              // 允许省略位宽的简写格式
     ;
 
 // 标准Verilog二进制字面量定义（IEEE 1364-2005 Section 2.5）
@@ -181,7 +181,7 @@ fragment OCTAL_NUMBER
 
 BINARY_NUMBER
     : SIZE_DIGIT '_'* '\'' [bB] [01xXzZ_]+  // 支持任意位宽（如3'b101）
-    | '\'' [bB] [01xXzZ]                 // 匹配简写格式（'b0）
+    | '\'' [bB] [01xXzZ]+                   // 匹配简写格式（'b0）
     ;
 fragment BINARY_DIGIT
     : [01xXzZ]
@@ -189,7 +189,7 @@ fragment BINARY_DIGIT
 // 标准Verilog十六进制字面量定义（IEEE 1364-2005 Section 2.5） 
 fragment HEX_NUMBER
     : SIZE_DIGIT? '\'' [hH] [0-9a-fA-FxXzZ_]+  // 支持x/z状态和下划线
-    | '\'' [hH]                                // 允许省略位宽的简写格式
+    | '\'' [hH] [0-9a-fA-FxXzZ_]+              // 允许省略位宽的简写格式
     ;
 
 fragment REAL_NUMBER
@@ -200,9 +200,9 @@ fragment REAL_NUMBER
 
 // 数字常量（IEEE 1364-2005 第2.5节）
 NUMBER
-    : DECIMAL_NUMBER
+    : BINARY_NUMBER
     | OCTAL_NUMBER
-    | BINARY_NUMBER
+    | DECIMAL_NUMBER
     | HEX_NUMBER
     | REAL_NUMBER
     ;
@@ -297,12 +297,12 @@ DOLLAR_PERIOD   : '$period';
 DOLLAR_NOCHANGE : '$nochange';
 
 // 数字常量
-BINARY_0        : '1\'b0';
-BINARY_1        : '1\'b1';
-BINARY_UPPER_0  : '1\'B0';
-BINARY_UPPER_1  : '1\'B1';
-QUOTED_0        : '\'0';
-QUOTED_1        : '\'1';
+// BINARY_0        : '1\'b0';
+// BINARY_1        : '1\'b1';
+// BINARY_UPPER_0  : '1\'B0';
+// BINARY_UPPER_1  : '1\'B1';
+// QUOTED_0        : '\'0';
+// QUOTED_1        : '\'1';
 
 // 门级原语延迟符号
 ARROW           : '->';

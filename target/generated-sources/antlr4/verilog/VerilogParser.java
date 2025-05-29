@@ -49,10 +49,9 @@ public class VerilogParser extends Parser {
 		SINGLE_QUOTE=186, SIZE_DIGIT=187, UDP_EDGE_SYMBOL=188, DOLLAR_SETUP=189, 
 		DOLLAR_HOLD=190, DOLLAR_WIDTH=191, DOLLAR_RECOVERY=192, DOLLAR_SKEW=193, 
 		DOLLAR_TIMESKEW=194, DOLLAR_FULLSKEW=195, DOLLAR_PERIOD=196, DOLLAR_NOCHANGE=197, 
-		BINARY_0=198, BINARY_1=199, BINARY_UPPER_0=200, BINARY_UPPER_1=201, QUOTED_0=202, 
-		QUOTED_1=203, ARROW=204, ARROW_ARROW=205, PULSE=206, FULLSKEW=207, POLARITY_OP=208, 
-		WS=209, BLOCK_COMMENT=210, LINE_COMMENT=211, JSON_OBJECT=212, JSON_ARRAY=213, 
-		JSON_PAIR=214, DECIMAL_NUMBER=215, BINARY_DIGIT=216;
+		ARROW=198, ARROW_ARROW=199, PULSE=200, FULLSKEW=201, POLARITY_OP=202, 
+		WS=203, BLOCK_COMMENT=204, LINE_COMMENT=205, JSON_OBJECT=206, JSON_ARRAY=207, 
+		JSON_PAIR=208, DECIMAL_NUMBER=209, BINARY_DIGIT=210;
 	public static final int
 		RULE_source_text = 0, RULE_description = 1, RULE_module_declaration = 2, 
 		RULE_module_body = 3, RULE_module_declaration_section = 4, RULE_module_behavioral_section = 5, 
@@ -264,8 +263,7 @@ public class VerilogParser extends Parser {
 			"'$'", "'?'", "':'", "';'", "','", "'.'", "'('", "')'", "'['", "']'", 
 			"'{'", "'}'", "'+:'", "'-:'", "'=>'", "'*>'", "'''", null, null, "'$setup'", 
 			"'$hold'", "'$width'", "'$recovery'", "'$skew'", "'$timeskew'", "'$fullskew'", 
-			"'$period'", "'$nochange'", "'1'b0'", "'1'b1'", "'1'B0'", "'1'B1'", "''0'", 
-			"''1'", "'->'", "'->>'", "'pulse'", "'fullskew'"
+			"'$period'", "'$nochange'", "'->'", "'->>'", "'pulse'", "'fullskew'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -299,11 +297,9 @@ public class VerilogParser extends Parser {
 			"LBRACE", "RBRACE", "PLUS_COLON", "MINUS_COLON", "IMPLIES", "STAR_GT", 
 			"SINGLE_QUOTE", "SIZE_DIGIT", "UDP_EDGE_SYMBOL", "DOLLAR_SETUP", "DOLLAR_HOLD", 
 			"DOLLAR_WIDTH", "DOLLAR_RECOVERY", "DOLLAR_SKEW", "DOLLAR_TIMESKEW", 
-			"DOLLAR_FULLSKEW", "DOLLAR_PERIOD", "DOLLAR_NOCHANGE", "BINARY_0", "BINARY_1", 
-			"BINARY_UPPER_0", "BINARY_UPPER_1", "QUOTED_0", "QUOTED_1", "ARROW", 
-			"ARROW_ARROW", "PULSE", "FULLSKEW", "POLARITY_OP", "WS", "BLOCK_COMMENT", 
-			"LINE_COMMENT", "JSON_OBJECT", "JSON_ARRAY", "JSON_PAIR", "DECIMAL_NUMBER", 
-			"BINARY_DIGIT"
+			"DOLLAR_FULLSKEW", "DOLLAR_PERIOD", "DOLLAR_NOCHANGE", "ARROW", "ARROW_ARROW", 
+			"PULSE", "FULLSKEW", "POLARITY_OP", "WS", "BLOCK_COMMENT", "LINE_COMMENT", 
+			"JSON_OBJECT", "JSON_ARRAY", "JSON_PAIR", "DECIMAL_NUMBER", "BINARY_DIGIT"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -13058,7 +13054,7 @@ public class VerilogParser extends Parser {
 			setState(1963);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if (((((_la - 169)) & ~0x3f) == 0 && ((1L << (_la - 169)) & 103079215105L) != 0)) {
+			if (((((_la - 169)) & ~0x3f) == 0 && ((1L << (_la - 169)) & 1610612737L) != 0)) {
 				{
 				setState(1962);
 				delay3();
@@ -21469,7 +21465,7 @@ public class VerilogParser extends Parser {
 	}
 
 	private static final String _serializedATNSegment0 =
-		"\u0004\u0001\u00d8\u0bf0\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
+		"\u0004\u0001\u00d2\u0bf0\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
 		"\u0002\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004"+
 		"\u0002\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007"+
 		"\u0002\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b"+
@@ -21930,14 +21926,14 @@ public class VerilogParser extends Parser {
 		"\u01e6\u01e8\u01ea\u01ec\u01ee\u01f0\u01f2\u01f4\u01f6\u01f8\u01fa\u01fc"+
 		"\u01fe\u0200\u0202\u0204\u0206\u0208\u020a\u020c\u020e\u0210\u0212\u0214"+
 		"\u0216\u0218\u021a\u021c\u021e\u0220\u0222\u0224\u0226\u0228\u022a\u0000"+
-		"\u001a\u0002\u0000//11\u0003\u0000\u0090\u0090\u00ab\u00ab\u00d8\u00d8"+
-		"\u0003\u0000\u008a\u008a\u00ab\u00ab\u00d8\u00d8\u0002\u0000..;;\u0003"+
-		"\u0000**FFv{\u0001\u0000DE\u0001\u0000\u00d2\u00d3\u0002\u0000()::\u0005"+
+		"\u001a\u0002\u0000//11\u0003\u0000\u0090\u0090\u00ab\u00ab\u00d2\u00d2"+
+		"\u0003\u0000\u008a\u008a\u00ab\u00ab\u00d2\u00d2\u0002\u0000..;;\u0003"+
+		"\u0000**FFv{\u0001\u0000DE\u0001\u0000\u00cc\u00cd\u0002\u0000()::\u0005"+
 		"\u0000VW^beehhlm\u0002\u000033==\b\u0000\u0002\u0002225599no\u0081\u0081"+
 		"\u0089\u008a\u0097\u0097\u0007\u0000\u0002\u000299oo\u0089\u008f\u0091"+
 		"\u0094\u009e\u009f\u00a2\u00a5\u0001\u0000\u0091\u0092\u0001\u0000\u00a2"+
 		"\u00a5\u0001\u0000\u009e\u00a1\u0001\u0000\u0089\u008a\u0001\u0000\u008b"+
-		"\u008d\b\u0000\u0002\u0002\u0005\u00072249<<IK[[no\u0001\u0000\u00cc\u00cd"+
+		"\u008d\b\u0000\u0002\u0002\u0005\u00072249<<IK[[no\u0001\u0000\u00c6\u00c7"+
 		"\u0002\u0000\u0004\u0004SS\u0001\u0000|}\u0002\u0000\u0090\u0090\u0095"+
 		"\u009b\u0005\u0000\u0089\u008f\u0091\u0092\u0095\u0096\u0098\u0099\u009e"+
 		"\u00a1\u0002\u0000NNff\u0004\u0000??TTVVii\u0004\u0000@@UUWWjj\u0c76\u0000"+
@@ -22190,7 +22186,7 @@ public class VerilogParser extends Parser {
 		"\u0000\u02f0\u02ef\u0001\u0000\u0000\u0000\u02f1\u02f2\u0001\u0000\u0000"+
 		"\u0000\u02f2\u02f0\u0001\u0000\u0000\u0000\u02f2\u02f3\u0001\u0000\u0000"+
 		"\u0000\u02f35\u0001\u0000\u0000\u0000\u02f4\u02fa\u0005~\u0000\u0000\u02f5"+
-		"\u02fa\u0005\u00d7\u0000\u0000\u02f6\u02fa\u0005\u0084\u0000\u0000\u02f7"+
+		"\u02fa\u0005\u00d1\u0000\u0000\u02f6\u02fa\u0005\u0084\u0000\u0000\u02f7"+
 		"\u02f8\u0005\u0084\u0000\u0000\u02f8\u02fa\u0005~\u0000\u0000\u02f9\u02f4"+
 		"\u0001\u0000\u0000\u0000\u02f9\u02f5\u0001\u0000\u0000\u0000\u02f9\u02f6"+
 		"\u0001\u0000\u0000\u0000\u02f9\u02f7\u0001\u0000\u0000\u0000\u02fa7\u0001"+
@@ -22659,8 +22655,8 @@ public class VerilogParser extends Parser {
 		"\u0000\u0000\u0632\u063d\u0003\u010e\u0087\u0000\u0633\u0634\u0005\u00a9"+
 		"\u0000\u0000\u0634\u0635\u0005\u00b0\u0000\u0000\u0635\u0636\u0003\u014a"+
 		"\u00a5\u0000\u0636\u0637\u0005\u00b1\u0000\u0000\u0637\u063d\u0001\u0000"+
-		"\u0000\u0000\u0638\u0639\u0005\u00cc\u0000\u0000\u0639\u063d\u0003\u010e"+
-		"\u0087\u0000\u063a\u063b\u0005\u00cd\u0000\u0000\u063b\u063d\u0003\u010e"+
+		"\u0000\u0000\u0638\u0639\u0005\u00c6\u0000\u0000\u0639\u063d\u0003\u010e"+
+		"\u0087\u0000\u063a\u063b\u0005\u00c7\u0000\u0000\u063b\u063d\u0003\u010e"+
 		"\u0087\u0000\u063c\u0631\u0001\u0000\u0000\u0000\u063c\u0633\u0001\u0000"+
 		"\u0000\u0000\u063c\u0638\u0001\u0000\u0000\u0000\u063c\u063a\u0001\u0000"+
 		"\u0000\u0000\u063d\u010d\u0001\u0000\u0000\u0000\u063e\u0641\u0005\u007f"+
@@ -22898,8 +22894,8 @@ public class VerilogParser extends Parser {
 		"\u0000\u0000\u07d2\u07d4\u0001\u0000\u0000\u0000\u07d3\u07cd\u0001\u0000"+
 		"\u0000\u0000\u07d3\u07d4\u0001\u0000\u0000\u0000\u07d4\u07d5\u0001\u0000"+
 		"\u0000\u0000\u07d5\u07d6\u0005\u00b1\u0000\u0000\u07d6\u07e1\u0001\u0000"+
-		"\u0000\u0000\u07d7\u07d8\u0005\u00cc\u0000\u0000\u07d8\u07e1\u0003\u010e"+
-		"\u0087\u0000\u07d9\u07da\u0005\u00cd\u0000\u0000\u07da\u07db\u0005\u00b0"+
+		"\u0000\u0000\u07d7\u07d8\u0005\u00c6\u0000\u0000\u07d8\u07e1\u0003\u010e"+
+		"\u0087\u0000\u07d9\u07da\u0005\u00c7\u0000\u0000\u07da\u07db\u0005\u00b0"+
 		"\u0000\u0000\u07db\u07dc\u0003\u010e\u0087\u0000\u07dc\u07dd\u0005\u00ae"+
 		"\u0000\u0000\u07dd\u07de\u0003\u010e\u0087\u0000\u07de\u07df\u0005\u00b1"+
 		"\u0000\u0000\u07df\u07e1\u0001\u0000\u0000\u0000\u07e0\u07c8\u0001\u0000"+
