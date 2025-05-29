@@ -162,29 +162,40 @@ SCALAR_CONSTANT
     ;
 
 // fragment 声明（表示该规则只能被其他词法规则引用，不能单独作为 token）
+// 新增十进制基数规则（IEEE 1364-2005 Section 2.5）
 fragment DECIMAL_NUMBER
-    : [0-9]+ ('_' [0-9]+)*                          // 纯整数
-    | [0-9]+ ('_' [0-9]+)* '.' [0-9]+ ('_' [0-9]+)* // 小数
-    | ( [0-9]+ ('_' [0-9]+)* | [0-9]+ ('_' [0-9]+)* '.' [0-9]+ ('_' [0-9]+)* )
-      [eE] [+-]? [0-9]+ ('_' [0-9]+)*              // 科学计数法
+    : SIZE_DIGIT? '\'' [dD] [0-9xXzZ_]+  // 支持x/z状态和下划线
+    | '\'' [dD]                          // 允许省略位宽的简写格式
     ;
 
 fragment OCTAL_NUMBER
-    : '0' [oO] [0-7]+ ('_' [0-7]+)*
+    : SIZE_DIGIT? '\'' [oO] [0-7xXzZ_]+  // 支持x/z状态和下划线
+    | '\'' [oO]                          // 允许省略位宽的简写格式
     ;
 
-fragment BINARY_NUMBER
-    : '0' [bB] [01]+ ('_' [01]+)*
-    ;
+// 标准Verilog二进制字面量定义（IEEE 1364-2005 Section 2.5）
+// BINARY_NUMBER //这个貌似识别不了 1'b0 很抽象
+//     : SIZE_DIGIT? '\'' [bB] [01xXzZ_]+
+//     | '\'' [bB]
+//     ;
 
+BINARY_NUMBER
+    : SIZE_DIGIT '_'* '\'' [bB] [01xXzZ_]+  // 支持任意位宽（如3'b101）
+    | '\'' [bB] [01xXzZ]                 // 匹配简写格式（'b0）
+    ;
+fragment BINARY_DIGIT
+    : [01xXzZ]
+    ;
+// 标准Verilog十六进制字面量定义（IEEE 1364-2005 Section 2.5） 
 fragment HEX_NUMBER
-    : '0' [hH] [0-9a-fA-F]+ ('_' [0-9a-fA-F]+)*
+    : SIZE_DIGIT? '\'' [hH] [0-9a-fA-FxXzZ_]+  // 支持x/z状态和下划线
+    | '\'' [hH]                                // 允许省略位宽的简写格式
     ;
 
 fragment REAL_NUMBER
-    : [0-9]+ '.' [0-9]+
-    | '.' [0-9]+
-    | [0-9]+ [eE] [+-]? [0-9]+
+    : SIZE_DIGIT '.' SIZE_DIGIT
+    | '.' SIZE_DIGIT
+    | SIZE_DIGIT [eE] [+-]? SIZE_DIGIT
     ;
 
 // 数字常量（IEEE 1364-2005 第2.5节）
@@ -211,7 +222,7 @@ CARET_TILDE : '^~';  // 必须在 TILDE 和 CARET 之前定义
 ONESTEP: 'x' | 'X';  // 标准允许的初始化简写
 // 定义所有词法规则（大写开头）
 STRING : '"' .*? '"' ;                      // 字符串规则
-SIMPLE_IDENTIFIER : [a-zA-Z_] [a-zA-Z0-9_$]* ;  // 普通标识符
+SIMPLE_IDENTIFIER : [a-zA-Z_] [a-zA-Z0-9_$]*;  // 普通标识符
 ESCAPED_IDENTIFIER : '\\' ~[ \r\t\n]+ ;     // 转义标识符（如 \abc ）
 
 // 运算符（IEEE 1364-2005 第4.1节）
@@ -236,6 +247,8 @@ BIT_XOR         : '^';
 BIT_XNOR        : TILDE_CARET | CARET_TILDE;
 REDUCE_NOR      : '~|';
 REDUCE_NAND     : '~&';
+ASSIGN_LE       : '<=' { !isInAssignContext() }?; // 需要上下文判断
+ASSIGN_NB       : '<=' { isNonBlockingAssign() }?; // 需要上下文判断
 LEFT_SHIFT      : '<<';
 RIGHT_SHIFT     : '>>';
 SHRA            : '>>>';
@@ -245,8 +258,6 @@ LESS_EQ         : '<=';
 GREATER         : '>';
 GREATER_EQ      : '>=';
 ASSIGN_EQ       : '=';
-ASSIGN_LE: '<=' { !isInAssignContext() }?; // 需要上下文判断
-ASSIGN_NB: '<=' { isNonBlockingAssign() }?; // 需要上下文判断
 TICK            : '`';
 AT              : '@';
 HASH            : '#';
@@ -262,15 +273,12 @@ LBRACK          : '[';
 RBRACK          : ']';
 LBRACE          : '{';
 RBRACE          : '}';
-
 PLUS_COLON      : '+:';
 MINUS_COLON     : '-:';
 IMPLIES         : '=>';
 STAR_GT         : '*>';
 
 SINGLE_QUOTE    : '\'';
-BINARY_VALUE    : [01xXzZ];
-BINARY_DIGIT    : [01];
 SIZE_DIGIT      : [0-9]+;
 
 // UDP专用符号（IEEE 1364-2005 第8.2节）

@@ -1,7 +1,15 @@
 parser grammar VerilogParser;
 
 options {
+    output = AST; // 保持AST生成
     tokenVocab = VerilogLexer;
+}
+
+// 在tokens段添加JSON节点类型
+tokens {
+    JSON_OBJECT,
+    JSON_ARRAY,
+    JSON_PAIR 
 }
 
 //===========================================================================//
@@ -29,15 +37,42 @@ description
 module_declaration
     : ( attribute_instance )* module_keyword module_identifier
       ( parameter_port_list )?
-      ( list_of_ports )? SEMI
-      ( module_item )*            // 模块内部各项，通过module_item分组
+      ( list_of_ports )? SEMI // 确保分号位置正确
+      module_body
       ENDMODULE
     ;
 
-module_keyword
-    : MODULE
-    | MACROMODULE
+module_body
+    : module_declaration_section* 
+      module_behavioral_section* 
+      module_structural_section*
     ;
+
+// 声明类内容（参数/网络/寄存器等）
+module_declaration_section
+    : ( parameter_declaration
+      | local_parameter_declaration
+      | net_declaration 
+      | reg_declaration
+      | integer_declaration )+
+    ;
+// 行为类内容（initial/always等）
+module_behavioral_section
+    : ( initial_construct
+      | always_construct 
+      | function_declaration
+      | task_declaration )+
+    ;
+// 结构类内容（实例化/生成块等）  
+module_structural_section
+    : ( module_instantiation
+      | gate_instantiation
+      | generate_region
+      | specify_block )+
+    ;
+
+module_keyword
+    : MODULE | MACROMODULE ;
 
 //===========================================================================//
 // 用户定义原语 (UDP Declaration) - IEEE 1364-2005 Appendix A.8
@@ -310,8 +345,9 @@ type_identifier
 // 模块头部可选的端口列表。
 //======================================================================//
 list_of_ports
-    : LPAREN port ( COMMA port )* RPAREN
-    | LPAREN RPAREN // Empty port list
+    : LPAREN 
+      ( port_declaration (COMMA port_declaration)* ) 
+      RPAREN
     ;
 
 port
@@ -345,12 +381,16 @@ module_item
 // 模块内部对端口的详细声明。
 //===========================================================================//
 port_declaration
-    : ( attribute_instance )* port_direction ( net_type )? ( range )? list_of_port_identifiers // Input/Output/Inout net/reg declaration
-    | ( attribute_instance )* port_direction REG ( range )? list_of_port_identifiers // Input/Output/Inout reg declaration
-    | ( attribute_instance )* ( net_type )? ( range )? list_of_port_identifiers // Implicit direction (standard allows this in some cases)
-    | ( attribute_instance )* REG ( range )? list_of_port_identifiers // Implicit direction reg
+    : (BLOCK_COMMENT|LINE_COMMENT)*
+      ( 
+        ( attribute_instance )* port_direction ( net_type )? ( range )? list_of_port_identifiers
+        | ( attribute_instance )* port_direction REG ( range )? list_of_port_identifiers
+        | ( attribute_instance )* ( net_type )? ( range )? list_of_port_identifiers
+        | ( attribute_instance )* REG ( range )? list_of_port_identifiers
+        | (INPUT | OUTPUT REG | OUTPUT | INOUT) port_identifier (dimension)? 
+      )
+      (BLOCK_COMMENT|LINE_COMMENT)*
     ;
-
 port_direction
     : INPUT
     | OUTPUT
@@ -697,42 +737,6 @@ concatenation_lvalue // Explicit rule for concatenation on left side
 // 条件语句 (Conditional Statement) - IEEE 1364-2005 Section 9.4
 // if-else 结构。
 //===========================================================================//
-conditional_statement
-    : IF LPAREN expression RPAREN statement_or_null
-      ( ELSE statement_or_null )?
-    ;
-
-//===========================================================================//
-// 循环语句 (Loop Statements) - IEEE 1364-2005 Section 9.6
-// forever, repeat, while, for 循环。
-//===========================================================================//
-loop_statement
-    : FOREVER statement_or_null
-    | REPEAT LPAREN expression RPAREN statement_or_null
-    | WHILE LPAREN expression RPAREN statement_or_null
-    | FOR LPAREN
-        for_initialization? SEMI
-        expression? SEMI
-        for_step?
-      RPAREN statement_or_null
-    ;
-
-for_initialization
-    : list_of_variable_assignments // Existing variables
-    | data_type_declaration list_of_variable_decl_assignments // New variable declaration (SystemVerilog)
-    ;
-
-data_type_declaration
-    : INTEGER // Simplified, can be more complex in SystemVerilog
-    | REAL
-    | REALTIME
-    | TIME
-    | REG ( range )? // Reg declaration in for loop init
-    | integer_type ( range )? // More general SystemVerilog types
-    | real_type
-    | realtime_type
-    | time_type
-    ;
 
 list_of_variable_decl_assignments
     : variable_decl_assignment (COMMA variable_decl_assignment)*
@@ -778,11 +782,16 @@ delay_value
     ;
 
 event_control
-    : AT LPAREN event_expression RPAREN // @ (event_expression)
-    | AT STAR // @* (all sensitivity)
-    | AT LPAREN STAR RPAREN // @(*) (all sensitivity)
+    : LPAREN (edge_identifier_list)? RPAREN
     ;
 
+edge_identifier_list
+    : edge_identifier (OR edge_identifier)*
+    ;
+// 单个边沿标识符定义
+edge_identifier
+    : (POSEDGE | NEGEDGE) identifier
+    ;
 event_expression
     : expression // Signal change
     | hierarchical_event_identifier // Event trigger
@@ -850,7 +859,6 @@ constant_primary
     | constant_concatenation
     | constant_function_call
     | LPAREN constant_expression RPAREN
-    | system_constant
     | MINUS NUMBER // Negative number constant
     | PLUS NUMBER  // Positive number constant
     ;
@@ -876,51 +884,30 @@ constant_function_call
       LPAREN ( constant_expression ( COMMA constant_expression )* )? RPAREN
     ;
 
-system_constant // SystemVerilog specific constants like '1'b1, '0'
-    : SINGLE_QUOTE BINARY_VALUE // '1'b1, '0'
-    | TICK identifier // 'identifier (SV macro evaluation?)
-    ;
-
 // General expression (can include variables, function calls, etc.)
 // 优化表达式分层
 expression
-    : conditional_expression
-    ;
-
-conditional_expression
-    : logical_or_expression (QUESTION expression COLON expression)?
+    : logical_or_expression
     ;
 
 logical_or_expression
-    : logical_and_expression (LOG_OR logical_and_expression)*
+    : logical_and_expression ( LOG_OR logical_and_expression )*
     ;
 
 logical_and_expression
-    : bitwise_or_expression (LOG_AND bitwise_or_expression)*
-    ;
-
-bitwise_or_expression
-    : bitwise_xor_expression (OR bitwise_xor_expression)*
-    ;
-
-bitwise_xor_expression
-    : bitwise_and_expression (XOR bitwise_and_expression)*
-    ;
-
-bitwise_and_expression
-    : equality_expression (AND equality_expression)*
+    : equality_expression ( LOG_AND equality_expression )*
     ;
 
 equality_expression
-    : relational_expression ((LOG_EQ | LOG_NEQ | CASE_EQ | CASE_NEQ) relational_expression)*
+    : relational_expression ( ( LOG_EQ | LOG_NEQ ) relational_expression )*
     ;
 
 relational_expression
-    : shift_expression ((LESS | LESS_EQ | GREATER | GREATER_EQ) shift_expression)*
+    : shift_expression ( ( LESS | LESS_EQ | GREATER | GREATER_EQ ) shift_expression )*
     ;
 
 shift_expression
-    : additive_expression ((LEFT_SHIFT | RIGHT_SHIFT) additive_expression)*
+    : additive_expression ( ( LEFT_SHIFT | RIGHT_SHIFT | SHLA | SHRA ) additive_expression )*
     ;
 
 additive_expression
@@ -937,15 +924,8 @@ unary_expression
 
 primary
     : NUMBER
-    | identifier ( LBRACK range_expression RBRACK )?
-    | concatenation_expression
-    | multiple_concatenation
-    | function_call
-    | system_function_call
-    | constant_function_call
+    | hierarchical_identifier
     | LPAREN expression RPAREN
-    | MINUS NUMBER
-    | PLUS NUMBER
     ;
 
 concatenation_expression
@@ -1063,34 +1043,60 @@ initial_construct
     : INITIAL statement_or_null
     ;
 
+statement
+    : conditional_statement
+    | statement_block
+    | SEMI  // 允许空语句
+    ;
+
 always_construct
-    : ALWAYS statement_or_null
+    : ALWAYS (AT ( attribute_instance )* event_control )? 
+      statement_block  
+    ;
+// 边沿控制说明符 (Edge Control Specifier) - IEEE 1364-2005 Section 9.7.1
+edge_control_specifier
+    : edge_designator ( identifier | hierarchical_identifier )
+    ;
+
+edge_designator
+    : POSEDGE
+    | NEGEDGE
+    ;
+
+event_expression_or_list
+    : event_expression ( COMMA event_expression )*
+    | LPAREN event_expression ( COMMA event_expression )* RPAREN 
+    ;
+
+statement_block
+    : BEGIN (BLOCK_COMMENT|LINE_COMMENT)* 
+      ( statement )* (BLOCK_COMMENT|LINE_COMMENT)*
+      END (BLOCK_COMMENT|LINE_COMMENT)*
+    | assignment_statement  // 允许独立赋值语句
+    ;
+
+
+conditional_statement
+    : IF LPAREN expression RPAREN 
+      BEGIN statement* END
+      ( ELSE BEGIN statement* END )?
     ;
 
 statement_or_null
     : statement
-    | SEMI // Empty statement
+    | SEMI
+    ;
+
+assignment_statement
+    : hierarchical_identifier 
+      ( ASSIGN_NB expression SEMI 
+      | ASSIGN expression SEMI )
     ;
 
 //===========================================================================//
 // 过程语句 (Procedural Statements) - IEEE 1364-2005 Section 9
 // 过程块内的各种语句类型。
 //===========================================================================//
-statement
-    : blocking_assignment SEMI                #BlockingAssignmentStmt
-    | non_blocking_assignment SEMI            #NonBlockingAssignmentStmt
-    | procedural_continuous_assignments SEMI  #ProceduralContinuousAssignStmt
-    | case_statement                          #CaseStmt
-    | conditional_statement                   #IfElseStmt
-    | loop_statement                          #LoopStmt
-    | wait_statement SEMI                     #WaitStmt
-    | disable_statement SEMI                  #DisableStmt
-    | event_trigger SEMI                      #EventTriggerStmt
-    | seq_block                               #SeqBlockStmt
-    | par_block                               #ParBlockStmt
-    | task_enable SEMI                        #TaskEnableStmt
-    | system_task_enable                      #SystemTaskEnableStmt
-    ;
 
 // Procedural continuous assignments (assign, deassign, force, release within blocks)
 procedural_continuous_assignments
@@ -1130,9 +1136,6 @@ hierarchical_task_identifier
     : hierarchical_identifier
     ;
 
-hierarchical_block_identifier
-    : hierarchical_identifier
-    ;
 
 // Sequential block (begin/end)
 seq_block
@@ -1140,6 +1143,13 @@ seq_block
       block_item_declaration* // Declarations within the block
       statement* // Statements within the block
     END
+    ;
+
+// Loop statements (for/while/repeat)
+loop_statement
+    : FOR LPAREN list_of_variable_assignments SEMI expression SEMI list_of_variable_assignments RPAREN statement_or_null
+    | WHILE LPAREN expression RPAREN statement_or_null
+    | REPEAT LPAREN expression RPAREN statement_or_null
     ;
 
 // Parallel block (fork/join)
@@ -1241,7 +1251,7 @@ function_item_declaration // Declarations allowed within function (subset of tas
 
 disable_statement
     : DISABLE hierarchical_task_identifier SEMI
-    | DISABLE hierarchical_block_identifier SEMI
+    | DISABLE hierarchical_identifier SEMI
     ;
 
 //===========================================================================//
@@ -1332,11 +1342,6 @@ parallel_edge_sensitive_path_description
 full_edge_sensitive_path_description
     : LPAREN edge_identifier? list_of_path_inputs STAR_GT
       LPAREN list_of_path_outputs polarity_operator? COLON data_source_expression RPAREN RPAREN
-    ;
-
-edge_identifier
-    : POSEDGE
-    | NEGEDGE
     ;
 
 data_source_expression
@@ -1567,8 +1572,7 @@ port_identifier
 
 // 基础标识符规则 (Assumed from Lexer)
 identifier
-    : SIMPLE_IDENTIFIER
-    | ESCAPED_IDENTIFIER
+    : IDENTIFIER
     ;
 
 //===========================================================================//

@@ -29,6 +29,30 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitModule_declaration(VerilogParser.Module_declarationContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link VerilogParser#module_body}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitModule_body(VerilogParser.Module_bodyContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#module_declaration_section}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitModule_declaration_section(VerilogParser.Module_declaration_sectionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#module_behavioral_section}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitModule_behavioral_section(VerilogParser.Module_behavioral_sectionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#module_structural_section}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitModule_structural_section(VerilogParser.Module_structural_sectionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link VerilogParser#module_keyword}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -755,30 +779,6 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConcatenation_lvalue(VerilogParser.Concatenation_lvalueContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link VerilogParser#conditional_statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitConditional_statement(VerilogParser.Conditional_statementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link VerilogParser#loop_statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLoop_statement(VerilogParser.Loop_statementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link VerilogParser#for_initialization}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFor_initialization(VerilogParser.For_initializationContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link VerilogParser#data_type_declaration}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitData_type_declaration(VerilogParser.Data_type_declarationContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link VerilogParser#list_of_variable_decl_assignments}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -832,6 +832,18 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitEvent_control(VerilogParser.Event_controlContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#edge_identifier_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEdge_identifier_list(VerilogParser.Edge_identifier_listContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#edge_identifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEdge_identifier(VerilogParser.Edge_identifierContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link VerilogParser#event_expression}.
 	 * @param ctx the parse tree
@@ -893,23 +905,11 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConstant_function_call(VerilogParser.Constant_function_callContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link VerilogParser#system_constant}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSystem_constant(VerilogParser.System_constantContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link VerilogParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitExpression(VerilogParser.ExpressionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link VerilogParser#conditional_expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitConditional_expression(VerilogParser.Conditional_expressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link VerilogParser#logical_or_expression}.
 	 * @param ctx the parse tree
@@ -922,24 +922,6 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitLogical_and_expression(VerilogParser.Logical_and_expressionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link VerilogParser#bitwise_or_expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBitwise_or_expression(VerilogParser.Bitwise_or_expressionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link VerilogParser#bitwise_xor_expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBitwise_xor_expression(VerilogParser.Bitwise_xor_expressionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link VerilogParser#bitwise_and_expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBitwise_and_expression(VerilogParser.Bitwise_and_expressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link VerilogParser#equality_expression}.
 	 * @param ctx the parse tree
@@ -1115,11 +1097,47 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInitial_construct(VerilogParser.Initial_constructContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link VerilogParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStatement(VerilogParser.StatementContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link VerilogParser#always_construct}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitAlways_construct(VerilogParser.Always_constructContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#edge_control_specifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEdge_control_specifier(VerilogParser.Edge_control_specifierContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#edge_designator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEdge_designator(VerilogParser.Edge_designatorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#event_expression_or_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEvent_expression_or_list(VerilogParser.Event_expression_or_listContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#statement_block}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStatement_block(VerilogParser.Statement_blockContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#conditional_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConditional_statement(VerilogParser.Conditional_statementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link VerilogParser#statement_or_null}.
 	 * @param ctx the parse tree
@@ -1127,96 +1145,11 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStatement_or_null(VerilogParser.Statement_or_nullContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code BlockingAssignmentStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
+	 * Visit a parse tree produced by {@link VerilogParser#assignment_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBlockingAssignmentStmt(VerilogParser.BlockingAssignmentStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code NonBlockingAssignmentStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNonBlockingAssignmentStmt(VerilogParser.NonBlockingAssignmentStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code ProceduralContinuousAssignStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitProceduralContinuousAssignStmt(VerilogParser.ProceduralContinuousAssignStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code CaseStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCaseStmt(VerilogParser.CaseStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code IfElseStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIfElseStmt(VerilogParser.IfElseStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code LoopStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLoopStmt(VerilogParser.LoopStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code WaitStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitWaitStmt(VerilogParser.WaitStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code DisableStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDisableStmt(VerilogParser.DisableStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code EventTriggerStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitEventTriggerStmt(VerilogParser.EventTriggerStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code SeqBlockStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSeqBlockStmt(VerilogParser.SeqBlockStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code ParBlockStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParBlockStmt(VerilogParser.ParBlockStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code TaskEnableStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTaskEnableStmt(VerilogParser.TaskEnableStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code SystemTaskEnableStmt}
-	 * labeled alternative in {@link VerilogParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSystemTaskEnableStmt(VerilogParser.SystemTaskEnableStmtContext ctx);
+	T visitAssignment_statement(VerilogParser.Assignment_statementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link VerilogParser#procedural_continuous_assignments}.
 	 * @param ctx the parse tree
@@ -1278,17 +1211,17 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitHierarchical_task_identifier(VerilogParser.Hierarchical_task_identifierContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link VerilogParser#hierarchical_block_identifier}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitHierarchical_block_identifier(VerilogParser.Hierarchical_block_identifierContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link VerilogParser#seq_block}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitSeq_block(VerilogParser.Seq_blockContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#loop_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLoop_statement(VerilogParser.Loop_statementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link VerilogParser#par_block}.
 	 * @param ctx the parse tree
@@ -1463,12 +1396,6 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFull_edge_sensitive_path_description(VerilogParser.Full_edge_sensitive_path_descriptionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link VerilogParser#edge_identifier}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitEdge_identifier(VerilogParser.Edge_identifierContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link VerilogParser#data_source_expression}.
 	 * @param ctx the parse tree

@@ -1,0 +1,582 @@
+{
+  "name": "source_text",
+  "children": [
+    {
+      "name": "description",
+      "children": [
+        {
+          "name": "module_declaration",
+          "children": [
+            {
+              "name": "module_keyword",
+              "children": [
+                {
+                  "name": "module", "value": "module"
+                }
+              ]
+            },
+            {
+              "name": "module_identifier",
+              "children": [
+                {
+                  "name": "identifier",
+                  "children": [
+                    {
+                      "name": "test_always", "value": "test_always"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "list_of_ports",
+              "children": [
+                {
+                  "name": "(", "value": "("
+                },
+                {
+                  "name": "port_declaration",
+                  "children": [
+                    {
+                      "name": "port_direction",
+                      "children": [
+                        {
+                          "name": "input", "value": "input"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "list_of_port_identifiers",
+                      "children": [
+                        {
+                          "name": "port_identifier",
+                          "children": [
+                            {
+                              "name": "identifier",
+                              "children": [
+                                {
+                                  "name": "I_sys_clk", "value": "I_sys_clk"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": ",", "value": ","
+                },
+                {
+                  "name": "port_declaration",
+                  "children": [
+                    {
+                      "name": "port_direction",
+                      "children": [
+                        {
+                          "name": "input", "value": "input"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "list_of_port_identifiers",
+                      "children": [
+                        {
+                          "name": "port_identifier",
+                          "children": [
+                            {
+                              "name": "identifier",
+                              "children": [
+                                {
+                                  "name": "I_rst_n", "value": "I_rst_n"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": ",", "value": ","
+                },
+                {
+                  "name": "port_declaration",
+                  "children": [
+                    {
+                      "name": "port_direction",
+                      "children": [
+                        {
+                          "name": "input", "value": "input"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "list_of_port_identifiers",
+                      "children": [
+                        {
+                          "name": "port_identifier",
+                          "children": [
+                            {
+                              "name": "identifier",
+                              "children": [
+                                {
+                                  "name": "I_a", "value": "I_a"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": ",", "value": ","
+                },
+                {
+                  "name": "port_declaration",
+                  "children": [
+                    {
+                      "name": "port_direction",
+                      "children": [
+                        {
+                          "name": "output", "value": "output"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "reg", "value": "reg"
+                    },
+                    {
+                      "name": "list_of_port_identifiers",
+                      "children": [
+                        {
+                          "name": "port_identifier",
+                          "children": [
+                            {
+                              "name": "identifier",
+                              "children": [
+                                {
+                                  "name": "O_cc", "value": "O_cc"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": ")", "value": ")"
+                }
+              ]
+            },
+            {
+              "name": ";", "value": ";"
+            },
+            {
+              "name": "module_body",
+              "children": [
+                {
+                  "name": "module_behavioral_section",
+                  "children": [
+                    {
+                      "name": "always_construct",
+                      "children": [
+                        {
+                          "name": "always", "value": "always"
+                        },
+                        {
+                          "name": "@", "value": "@"
+                        },
+                        {
+                          "name": "event_control",
+                          "children": [
+                            {
+                              "name": "(", "value": "("
+                            },
+                            {
+                              "name": "edge_identifier_list",
+                              "children": [
+                                {
+                                  "name": "edge_identifier",
+                                  "children": [
+                                    {
+                                      "name": "posedge", "value": "posedge"
+                                    },
+                                    {
+                                      "name": "identifier",
+                                      "children": [
+                                        {
+                                          "name": "I_sys_clk", "value": "I_sys_clk"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "or", "value": "or"
+                                },
+                                {
+                                  "name": "edge_identifier",
+                                  "children": [
+                                    {
+                                      "name": "negedge", "value": "negedge"
+                                    },
+                                    {
+                                      "name": "identifier",
+                                      "children": [
+                                        {
+                                          "name": "I_rst_n", "value": "I_rst_n"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": ")", "value": ")"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "statement_block",
+                          "children": [
+                            {
+                              "name": "begin", "value": "begin"
+                            },
+                            {
+                              "name": "statement",
+                              "children": [
+                                {
+                                  "name": "conditional_statement",
+                                  "children": [
+                                    {
+                                      "name": "if", "value": "if"
+                                    },
+                                    {
+                                      "name": "(", "value": "("
+                                    },
+                                    {
+                                      "name": "expression",
+                                      "children": [
+                                        {
+                                          "name": "logical_or_expression",
+                                          "children": [
+                                            {
+                                              "name": "logical_and_expression",
+                                              "children": [
+                                                {
+                                                  "name": "equality_expression",
+                                                  "children": [
+                                                    {
+                                                      "name": "relational_expression",
+                                                      "children": [
+                                                        {
+                                                          "name": "shift_expression",
+                                                          "children": [
+                                                            {
+                                                              "name": "additive_expression",
+                                                              "children": [
+                                                                {
+                                                                  "name": "multiplicative_expression",
+                                                                  "children": [
+                                                                    {
+                                                                      "name": "unary_expression",
+                                                                      "children": [
+                                                                        {
+                                                                          "name": "primary",
+                                                                          "children": [
+                                                                            {
+                                                                              "name": "hierarchical_identifier",
+                                                                              "children": [
+                                                                                {
+                                                                                  "name": "identifier",
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "name": "I_rst_n", "value": "I_rst_n"
+                                                                                    }
+                                                                                  ]
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "name": "==", "value": "=="
+                                                    },
+                                                    {
+                                                      "name": "relational_expression",
+                                                      "children": [
+                                                        {
+                                                          "name": "shift_expression",
+                                                          "children": [
+                                                            {
+                                                              "name": "additive_expression",
+                                                              "children": [
+                                                                {
+                                                                  "name": "multiplicative_expression",
+                                                                  "children": [
+                                                                    {
+                                                                      "name": "unary_expression",
+                                                                      "children": [
+                                                                        {
+                                                                          "name": "1'b0", "value": "1'b0"
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": ")", "value": ")"
+                                    },
+                                    {
+                                      "name": "begin", "value": "begin"
+                                    },
+                                    {
+                                      "name": "statement",
+                                      "children": [
+                                        {
+                                          "name": "statement_block",
+                                          "children": [
+                                            {
+                                              "name": "assignment_statement",
+                                              "children": [
+                                                {
+                                                  "name": "hierarchical_identifier",
+                                                  "children": [
+                                                    {
+                                                      "name": "identifier",
+                                                      "children": [
+                                                        {
+                                                          "name": "O_cc", "value": "O_cc"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "name": "<=", "value": "<="
+                                                },
+                                                {
+                                                  "name": "expression",
+                                                  "children": [
+                                                    {
+                                                      "name": "logical_or_expression",
+                                                      "children": [
+                                                        {
+                                                          "name": "logical_and_expression",
+                                                          "children": [
+                                                            {
+                                                              "name": "equality_expression",
+                                                              "children": [
+                                                                {
+                                                                  "name": "relational_expression",
+                                                                  "children": [
+                                                                    {
+                                                                      "name": "shift_expression",
+                                                                      "children": [
+                                                                        {
+                                                                          "name": "additive_expression",
+                                                                          "children": [
+                                                                            {
+                                                                              "name": "multiplicative_expression",
+                                                                              "children": [
+                                                                                {
+                                                                                  "name": "unary_expression",
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "name": "1'b0", "value": "1'b0"
+                                                                                    }
+                                                                                  ]
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "name": ";", "value": ";"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "end", "value": "end"
+                                    },
+                                    {
+                                      "name": "else", "value": "else"
+                                    },
+                                    {
+                                      "name": "begin", "value": "begin"
+                                    },
+                                    {
+                                      "name": "statement",
+                                      "children": [
+                                        {
+                                          "name": "statement_block",
+                                          "children": [
+                                            {
+                                              "name": "assignment_statement",
+                                              "children": [
+                                                {
+                                                  "name": "hierarchical_identifier",
+                                                  "children": [
+                                                    {
+                                                      "name": "identifier",
+                                                      "children": [
+                                                        {
+                                                          "name": "O_cc", "value": "O_cc"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "name": "<=", "value": "<="
+                                                },
+                                                {
+                                                  "name": "expression",
+                                                  "children": [
+                                                    {
+                                                      "name": "logical_or_expression",
+                                                      "children": [
+                                                        {
+                                                          "name": "logical_and_expression",
+                                                          "children": [
+                                                            {
+                                                              "name": "equality_expression",
+                                                              "children": [
+                                                                {
+                                                                  "name": "relational_expression",
+                                                                  "children": [
+                                                                    {
+                                                                      "name": "shift_expression",
+                                                                      "children": [
+                                                                        {
+                                                                          "name": "additive_expression",
+                                                                          "children": [
+                                                                            {
+                                                                              "name": "multiplicative_expression",
+                                                                              "children": [
+                                                                                {
+                                                                                  "name": "unary_expression",
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "name": "primary",
+                                                                                      "children": [
+                                                                                        {
+                                                                                          "name": "hierarchical_identifier",
+                                                                                          "children": [
+                                                                                            {
+                                                                                              "name": "identifier",
+                                                                                              "children": [
+                                                                                                {
+                                                                                                  "name": "I_a", "value": "I_a"
+                                                                                                }
+                                                                                              ]
+                                                                                            }
+                                                                                          ]
+                                                                                        }
+                                                                                      ]
+                                                                                    }
+                                                                                  ]
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "name": ";", "value": ";"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "end", "value": "end"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": "end", "value": "end"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "endmodule", "value": "endmodule"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "<EOF>", "value": "<EOF>"
+    }
+  ]
+}

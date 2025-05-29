@@ -14,6 +14,7 @@ import java.util.Arrays; // 新增的Arrays导入
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -34,6 +35,9 @@ public class Main {
         // 获取语法树
         ParseTree tree = parser.source_text();
         System.out.println(tree.toStringTree(parser));
+
+        // 保存为JSON
+        saveASTJson(parser, tree, "Verilog_AST.json");
 
         // 图形化展示
         if (!GraphicsEnvironment.isHeadless()) {
@@ -88,5 +92,46 @@ public class Main {
 
         ImageIO.write(image, "png", new File(filename));
         System.out.println("AST图片已保存到: " + filename);
+    }
+
+    // ParseTree转JSON字符串
+    private static String parseTreeToJson(ParseTree tree, Parser parser) {
+        StringBuilder sb = new StringBuilder();
+        parseTreeToJsonHelper(tree, parser, sb, 0);
+        return sb.toString();
+    }
+
+    private static void parseTreeToJsonHelper(ParseTree tree, Parser parser, StringBuilder sb, int indent) {
+        String nodeName;
+        if (tree instanceof ParserRuleContext) {
+            nodeName = parser.getRuleNames()[((ParserRuleContext) tree).getRuleIndex()];
+        } else {
+            nodeName = tree.getText().replace("\"", "\\\"");
+        }
+        String indentStr = "  ".repeat(indent);
+        sb.append(indentStr).append("{\n");
+        sb.append(indentStr).append("  \"name\": \"").append(nodeName).append("\"");
+        int childCount = tree.getChildCount();
+        if (childCount > 0) {
+            sb.append(",\n").append(indentStr).append("  \"children\": [\n");
+            for (int i = 0; i < childCount; i++) {
+                parseTreeToJsonHelper(tree.getChild(i), parser, sb, indent + 2);
+                if (i != childCount - 1) sb.append(",\n");
+            }
+            sb.append("\n").append(indentStr).append("  ]\n");
+            sb.append(indentStr).append("}");
+        } else {
+            sb.append(", \"value\": \"").append(tree.getText().replace("\"", "\\\"")).append("\"");
+            sb.append("\n").append(indentStr).append("}");
+        }
+    }
+
+    // 保存AST为JSON文件
+    private static void saveASTJson(VerilogParser parser, ParseTree tree, String filename) throws Exception {
+        String json = parseTreeToJson(tree, parser);
+        try (FileWriter fw = new FileWriter(filename)) {
+            fw.write(json);
+        }
+        System.out.println("AST已保存为JSON: " + filename);
     }
 }

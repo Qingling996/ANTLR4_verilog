@@ -1,39 +1,40 @@
-///////////////////////////////////////////////////////////////////////////
-/// Project Name         :    
-/// Software             : VS Code / Vivado 2018.3 / Modelsim SE 10.6e
-/// Target Device        : 
-/// Module Name          : adder
-/// Upper Level Module   : / 
-/// Detail Info          : <A brief summary of the code's intention>
-///////////////////////////////////////////////////////////////////////////
-/// Revision             : <1.0>
-/// Revision Date        : <2025-05-28 10:37:03>
-/// Author               : Adolph adolph1354238998@gmail.com
-/// Revision Detail Info : 
-/// <1.0> <2025-05-28>   : < A brief summary of the code's revsion>
-/// <1.1> <2025-xx-xx>   : < A brief summary of the code's revsion>
-///////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+//COPYRIGHT  <QAG>, <2025>
+//The copyright to the document herein is the property of 2025 <QAG>.
+//All rights reserved.
+////////////////////////////////////////////////////////////////////
+//Project: HWF27550101A
+//Module: test_always
+//Upper Level Module: / 
+//Detail information: <A brief summary of the code's intention>
+////////////////////////////////////////////////////////////////////
+//Revision: <1.1>
+//Revision Date : 2025-05-29
+//Author: <LiangJin> <liangj089@avic.com>
+//Revision detail information: 
+//<1.1>: < A brief summary of the code's revsion>
+//<1.2>: < A brief summary of the code's revsion>
+////////////////////////////////////////////////////////////////////
 
-module adder #(
-    parameter            C_DATA_WIDTH             = 4                           
-    )(
+module test_always(
     /* --------------------- Input Signals --------------------- */
     input                                         I_sys_clk                     ,//System Clock xx MHz
     input                                         I_rst_n                       ,//Reset Signal, Low Valid
-    input                [C_DATA_WIDTH-1:0 ]      I_a                           ,//
-    input                [C_DATA_WIDTH-1:0 ]      I_b                           ,//
-    input                                         a,b,c,d,e,f                   ,
+    input                                         I_a                           ,//
     /* --------------------- Output Signals -------------------- */
-    output               [ 2:0 ]                  x,y,z,w,
-    input                [C_DATA_WIDTH:0 ]        O_sum                         //
+    output reg                                    O_cc                          //
+    
 );
 
 /* ================================================================================================  */
 /*                                             Main Code                                             */
 /* ================================================================================================  */
-    assign          O_sum                         = I_a + I_b;
-    assign          x                             = a + b * c - d / e;
-    assign          y                             = (a + b) * (c - d);
-    assign          z                             = a && b || c;
-    assign          w                             = a < b ? c + d : e * f;
-endmodule //adder END
+ always @(posedge I_sys_clk or negedge I_rst_n) begin
+ if(I_rst_n == 1'b0) begin
+ O_cc <= 1'b0;
+ end
+ else begin
+ O_cc <= I_a; // O_cc will follow the value of I_a
+ end
+ end
+endmodule //test_always END

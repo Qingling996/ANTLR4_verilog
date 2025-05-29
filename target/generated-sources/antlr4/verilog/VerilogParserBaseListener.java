@@ -53,6 +53,54 @@ public class VerilogParserBaseListener implements VerilogParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterModule_body(VerilogParser.Module_bodyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitModule_body(VerilogParser.Module_bodyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterModule_declaration_section(VerilogParser.Module_declaration_sectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitModule_declaration_section(VerilogParser.Module_declaration_sectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterModule_behavioral_section(VerilogParser.Module_behavioral_sectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitModule_behavioral_section(VerilogParser.Module_behavioral_sectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterModule_structural_section(VerilogParser.Module_structural_sectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitModule_structural_section(VerilogParser.Module_structural_sectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterModule_keyword(VerilogParser.Module_keywordContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1505,54 +1553,6 @@ public class VerilogParserBaseListener implements VerilogParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterConditional_statement(VerilogParser.Conditional_statementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitConditional_statement(VerilogParser.Conditional_statementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLoop_statement(VerilogParser.Loop_statementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLoop_statement(VerilogParser.Loop_statementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterFor_initialization(VerilogParser.For_initializationContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFor_initialization(VerilogParser.For_initializationContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterData_type_declaration(VerilogParser.Data_type_declarationContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitData_type_declaration(VerilogParser.Data_type_declarationContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterList_of_variable_decl_assignments(VerilogParser.List_of_variable_decl_assignmentsContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1656,6 +1656,30 @@ public class VerilogParserBaseListener implements VerilogParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitEvent_control(VerilogParser.Event_controlContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEdge_identifier_list(VerilogParser.Edge_identifier_listContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEdge_identifier_list(VerilogParser.Edge_identifier_listContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEdge_identifier(VerilogParser.Edge_identifierContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEdge_identifier(VerilogParser.Edge_identifierContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1781,18 +1805,6 @@ public class VerilogParserBaseListener implements VerilogParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSystem_constant(VerilogParser.System_constantContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSystem_constant(VerilogParser.System_constantContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterExpression(VerilogParser.ExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1800,18 +1812,6 @@ public class VerilogParserBaseListener implements VerilogParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitExpression(VerilogParser.ExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterConditional_expression(VerilogParser.Conditional_expressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitConditional_expression(VerilogParser.Conditional_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1836,42 +1836,6 @@ public class VerilogParserBaseListener implements VerilogParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitLogical_and_expression(VerilogParser.Logical_and_expressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterBitwise_or_expression(VerilogParser.Bitwise_or_expressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBitwise_or_expression(VerilogParser.Bitwise_or_expressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterBitwise_xor_expression(VerilogParser.Bitwise_xor_expressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBitwise_xor_expression(VerilogParser.Bitwise_xor_expressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterBitwise_and_expression(VerilogParser.Bitwise_and_expressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBitwise_and_expression(VerilogParser.Bitwise_and_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -2225,6 +2189,18 @@ public class VerilogParserBaseListener implements VerilogParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterStatement(VerilogParser.StatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStatement(VerilogParser.StatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAlways_construct(VerilogParser.Always_constructContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -2232,6 +2208,66 @@ public class VerilogParserBaseListener implements VerilogParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAlways_construct(VerilogParser.Always_constructContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEdge_control_specifier(VerilogParser.Edge_control_specifierContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEdge_control_specifier(VerilogParser.Edge_control_specifierContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEdge_designator(VerilogParser.Edge_designatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEdge_designator(VerilogParser.Edge_designatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEvent_expression_or_list(VerilogParser.Event_expression_or_listContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEvent_expression_or_list(VerilogParser.Event_expression_or_listContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterStatement_block(VerilogParser.Statement_blockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStatement_block(VerilogParser.Statement_blockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterConditional_statement(VerilogParser.Conditional_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitConditional_statement(VerilogParser.Conditional_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -2249,157 +2285,13 @@ public class VerilogParserBaseListener implements VerilogParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterBlockingAssignmentStmt(VerilogParser.BlockingAssignmentStmtContext ctx) { }
+	@Override public void enterAssignment_statement(VerilogParser.Assignment_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitBlockingAssignmentStmt(VerilogParser.BlockingAssignmentStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterNonBlockingAssignmentStmt(VerilogParser.NonBlockingAssignmentStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNonBlockingAssignmentStmt(VerilogParser.NonBlockingAssignmentStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterProceduralContinuousAssignStmt(VerilogParser.ProceduralContinuousAssignStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitProceduralContinuousAssignStmt(VerilogParser.ProceduralContinuousAssignStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterCaseStmt(VerilogParser.CaseStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCaseStmt(VerilogParser.CaseStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterIfElseStmt(VerilogParser.IfElseStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitIfElseStmt(VerilogParser.IfElseStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLoopStmt(VerilogParser.LoopStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLoopStmt(VerilogParser.LoopStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterWaitStmt(VerilogParser.WaitStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitWaitStmt(VerilogParser.WaitStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterDisableStmt(VerilogParser.DisableStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitDisableStmt(VerilogParser.DisableStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterEventTriggerStmt(VerilogParser.EventTriggerStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitEventTriggerStmt(VerilogParser.EventTriggerStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSeqBlockStmt(VerilogParser.SeqBlockStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSeqBlockStmt(VerilogParser.SeqBlockStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterParBlockStmt(VerilogParser.ParBlockStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitParBlockStmt(VerilogParser.ParBlockStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTaskEnableStmt(VerilogParser.TaskEnableStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTaskEnableStmt(VerilogParser.TaskEnableStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSystemTaskEnableStmt(VerilogParser.SystemTaskEnableStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSystemTaskEnableStmt(VerilogParser.SystemTaskEnableStmtContext ctx) { }
+	@Override public void exitAssignment_statement(VerilogParser.Assignment_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -2525,18 +2417,6 @@ public class VerilogParserBaseListener implements VerilogParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterHierarchical_block_identifier(VerilogParser.Hierarchical_block_identifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitHierarchical_block_identifier(VerilogParser.Hierarchical_block_identifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterSeq_block(VerilogParser.Seq_blockContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -2544,6 +2424,18 @@ public class VerilogParserBaseListener implements VerilogParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSeq_block(VerilogParser.Seq_blockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLoop_statement(VerilogParser.Loop_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLoop_statement(VerilogParser.Loop_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -2892,18 +2784,6 @@ public class VerilogParserBaseListener implements VerilogParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitFull_edge_sensitive_path_description(VerilogParser.Full_edge_sensitive_path_descriptionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterEdge_identifier(VerilogParser.Edge_identifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitEdge_identifier(VerilogParser.Edge_identifierContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
