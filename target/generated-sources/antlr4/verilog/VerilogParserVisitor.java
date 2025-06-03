@@ -65,6 +65,12 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitModule_procedural_item(VerilogParser.Module_procedural_itemContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link VerilogParser#module_instantiation_item}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitModule_instantiation_item(VerilogParser.Module_instantiation_itemContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link VerilogParser#parameter_declaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -496,6 +502,66 @@ public interface VerilogParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDeassign_statement(VerilogParser.Deassign_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#module_instantiation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitModule_instantiation(VerilogParser.Module_instantiationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#parameter_value_assignment}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParameter_value_assignment(VerilogParser.Parameter_value_assignmentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#list_of_parameter_assignments}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitList_of_parameter_assignments(VerilogParser.List_of_parameter_assignmentsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#ordered_parameter_assignment}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrdered_parameter_assignment(VerilogParser.Ordered_parameter_assignmentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#named_parameter_assignment}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNamed_parameter_assignment(VerilogParser.Named_parameter_assignmentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#module_instance}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitModule_instance(VerilogParser.Module_instanceContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#name_of_instance}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitName_of_instance(VerilogParser.Name_of_instanceContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#list_of_port_connections}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitList_of_port_connections(VerilogParser.List_of_port_connectionsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#ordered_port_connection}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrdered_port_connection(VerilogParser.Ordered_port_connectionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link VerilogParser#named_port_connection}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNamed_port_connection(VerilogParser.Named_port_connectionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link VerilogParser#loop_statement}.
 	 * @param ctx the parse tree

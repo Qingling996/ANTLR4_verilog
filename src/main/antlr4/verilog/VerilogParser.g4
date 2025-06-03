@@ -58,6 +58,7 @@ non_port_module_item
     | continuous_assign
     | parameter_override
     | module_procedural_item
+    | module_instantiation_item // <--- 新增：模块实例化项
     ;
 
 // 模块内部的声明项
@@ -73,6 +74,11 @@ module_declaration_item
 module_procedural_item
     : initial_construct
     | always_construct
+    ;
+
+// <--- 新增：模块实例化项分组
+module_instantiation_item
+    : module_instantiation // Includes SEMI
     ;
 
 //===========================================================================//
@@ -118,7 +124,7 @@ list_of_param_assignments
     ;
 
 param_assignment
-    : parameter_identifier ( ASSIGN_EQ constant_expression )?
+    : (PARAMETER | LOCALPARAM)? ( SIGNED )? ( range )? parameter_identifier ( ASSIGN_EQ constant_expression )?
     ;
 
 hierarchical_parameter_identifier
@@ -151,10 +157,11 @@ ansi_port_list
 ansi_port_declaration
     : (BLOCK_COMMENT|LINE_COMMENT)*
       (
-        ( attribute_instance )* port_direction ( net_type )? ( range )? list_of_port_identifiers
-        | ( attribute_instance )* port_direction REG ( range )? list_of_port_identifiers
-        | ( attribute_instance )* ( net_type )? ( range )? list_of_port_identifiers
-        | ( attribute_instance )* REG ( range )? list_of_port_identifiers
+        ( attribute_instance )* port_direction ( SIGNED )? ( net_type )? ( range )? list_of_port_identifiers
+        | ( attribute_instance )* port_direction REG ( SIGNED )? ( range )? list_of_port_identifiers
+        | ( attribute_instance )* port_direction ( SIGNED )? list_of_port_identifiers
+        | ( attribute_instance )* ( net_type )? ( SIGNED )? ( range )? list_of_port_identifiers
+        | ( attribute_instance )* REG ( SIGNED )? ( range )? list_of_port_identifiers
       )
       (BLOCK_COMMENT|LINE_COMMENT)*
     ;
@@ -166,10 +173,11 @@ ansi_port_declaration
 port_declaration
     : (BLOCK_COMMENT|LINE_COMMENT)*
       (
-        ( attribute_instance )* port_direction ( net_type )? ( range )? list_of_port_identifiers
-        | ( attribute_instance )* port_direction REG ( range )? list_of_port_identifiers
-        | ( attribute_instance )* ( net_type )? ( range )? list_of_port_identifiers
-        | ( attribute_instance )* REG ( range )? list_of_port_identifiers
+        ( attribute_instance )* port_direction ( SIGNED )? ( net_type )? ( range )? list_of_port_identifiers
+        | ( attribute_instance )* port_direction REG ( SIGNED )? ( range )? list_of_port_identifiers
+        | ( attribute_instance )* port_direction ( SIGNED )? list_of_port_identifiers
+        | ( attribute_instance )* ( net_type )? ( SIGNED )? ( range )? list_of_port_identifiers
+        | ( attribute_instance )* REG ( SIGNED )? ( range )? list_of_port_identifiers
       )
       (BLOCK_COMMENT|LINE_COMMENT)*
     ;
@@ -466,12 +474,12 @@ statement_or_null
 statement
     : blocking_assignment SEMI
     | non_blocking_assignment SEMI
-    | conditional_statement // No SEMI here, it's a compound statement
-    | case_statement // No SEMI here
-    | statement_block // No SEMI here
+    | conditional_statement
+    | case_statement
+    | statement_block
     | assign_statement SEMI
     | deassign_statement SEMI
-    | loop_statement // No SEMI here
+    | loop_statement
     ;
 
 // 条件语句 (Conditional Statement) - IEEE 1364-2005 Section 9.4
@@ -482,7 +490,7 @@ conditional_statement
 
 else_clause
     : ELSE statement_or_null
-    | ELSE IF LPAREN expression RPAREN statement_or_null (else_clause)? // 递归处理 else if
+    | ELSE IF LPAREN expression RPAREN statement_or_null (else_clause)?
     ;
 
 statement_block
@@ -516,6 +524,54 @@ assign_statement    : ASSIGN variable_lvalue ASSIGN_EQ expression ;
 deassign_statement  : DEASSIGN variable_lvalue ;
 
 //===========================================================================//
+// 模块实例化 (Module Instantiation) - IEEE 1364-2005 Section 12.3
+// 实例化其他模块。
+//===========================================================================//
+module_instantiation
+    : module_identifier ( drive_strength )? ( parameter_value_assignment )?
+      module_instance ( COMMA module_instance )* SEMI
+    ;
+
+parameter_value_assignment
+    : HASH LPAREN list_of_parameter_assignments RPAREN
+    ;
+
+list_of_parameter_assignments
+    : ordered_parameter_assignment ( COMMA ordered_parameter_assignment )*
+    | named_parameter_assignment ( COMMA named_parameter_assignment )*
+    ;
+
+ordered_parameter_assignment
+    : expression
+    ;
+
+named_parameter_assignment
+    : DOT parameter_identifier LPAREN expression? RPAREN
+    ;
+
+module_instance
+    : name_of_instance ( range )? // Instance array optional range
+      LPAREN list_of_port_connections RPAREN
+    ;
+
+name_of_instance
+    : identifier
+    ;
+
+list_of_port_connections
+    : ordered_port_connection ( COMMA ordered_port_connection )*
+    | named_port_connection ( COMMA named_port_connection )*
+    ;
+
+ordered_port_connection
+    : expression?  // Allows empty connection (e.g., .port())
+    ;
+
+named_port_connection
+    : DOT port_identifier LPAREN expression? RPAREN // Allows empty connection (e.g., .port())
+    ;
+
+//===========================================================================//
 // 循环语句 (Loop Statements) - IEEE 1364-2005 Section 9.5
 //===========================================================================//
 loop_statement
@@ -528,8 +584,8 @@ list_of_variable_assignments
     ;
 
 variable_assignment
-    : variable_lvalue ASSIGN_EQ expression  // Blocking assignment in assignment list
-    | variable_lvalue LE_OP expression  // Non-blocking assignment in assignment list
+    : variable_lvalue ASSIGN_EQ expression
+    | variable_lvalue LE_OP expression
     ;
 
 // Declarations allowed within a block (begin/end)
