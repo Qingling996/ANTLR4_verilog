@@ -4,8 +4,8 @@
 //All rights reserved.
 ////////////////////////////////////////////////////////////////////
 //Project: HWF27550101
-//Module: Manchester_encode
-//Upper Level Module: man_encode_fifo 
+//Module: sample
+//Upper Level Module: man_sample_dec_fifo 
 //Detail information: <A brief summary of the code's intention>
 ////////////////////////////////////////////////////////////////////
 //Revision: <1.1>
@@ -16,189 +16,224 @@
 //<1.2>: < A brief summary of the code's revsion>
 ////////////////////////////////////////////////////////////////////
 
-module Manchester_encode (
+/// Main Function:(Describing main function of the module)
+/// 6分频，计数器计0-5
+// 在 cnt == 4 ，的时候，统计前三个周期的计数值， 0、1->0  2、3->1
+// 进而决定整个周期的数据为 {x,~x}
+///*********************************************************************///
+`define aa123 (123 + TIMES)
+`ifdef macro
+`elsif ma1
+`endif
+`timescale 1ns/1ps
+// `include "test.txt"
+
+module sample(
     /* --------------------- Input Signals --------------------- */
-    input                                         I_sys_clk                     ,//system clock 30MHz
+    input                                         I_sys_clk                     ,//system clock 30 MHz
     input                                         I_rst_n                       ,//I_rst_n, low valid
-    input                                         I_en_code                     ,//����ʹ��
-    input                [15:00]                  I_data                        ,//�������������
+    input                                         I_CCDL_IN                     ,//曼彻斯特编码数据帧
     /* --------------------- Output Signals -------------------- */
-    output reg                                    O_encode                      ,//�����������
-    output reg                                    O_en_done                     //
+    output reg           [31:00]                  O_sample_data                 ,//采样后的曼彻斯特编码
+    output reg                                    O_sample_valid                //输出有效
 );
 
 /* ================================================================================================  */
 /*                                        Parameter                                                  */
 /* ================================================================================================  */
 
-    localparam           C_MAX_5M_CNT             = 10'd6                       ;//30M 6��Ƶ
-    localparam           C_MAX_SEQ_CNT            = 6'd40                       ;//(3 + 16 + 1) * 2
-    
+    localparam           C_MAX_5M_CNT             = 6'd6                        ;//30MHz 6分频
+    localparam           C_JUDGE_ONE              = 4'd2                        ;
+    localparam           C_JUDGE_ZERO             = 4'd1                        ;
+
 /* ================================================================================================  */
 /*                                        Signals                                                    */
 /* ================================================================================================  */
 
-    reg                                           S_en_code_d1                  ;//
-    reg                  [15:00]                  S_data_d1                     ;//
-    wire                                          S_odd_bit                     ;//��У��
-    integer                                       S_cnt_loop                    ;//
-    wire                 [16:00]                  S_data_tmp                    ;//
-    reg                  [33:00]                  S_Man_data                    ;//16bit data + 1bit odd
-    reg                  [03:00]                  S_cnt_5m                      ;//Counter
-    reg                                           S_add_cnt_5m                  ;//Counter Enable
-    wire                                          S_end_cnt_5m                  ;//Counter reset
-    reg                  [05:00]                  S_cnt_seq                     ;//Counter
-    wire                                          S_add_cnt_seq                 ;//Counter Enable
-    wire                                          S_end_cnt_seq                 ;//Counter reset
-    
+    reg                  [01:00]                  S_data_d                      ;//
+    wire                                          S_pos_data                    ;//
+    wire                                          S_neg_data                    ;//
+    reg                                           S_frame_front_high            ;//
+    reg                                           S_work_enable                 ;//
+    reg                  [05:00]                  S_cnt_frame                   ;//
+    reg                  [03:00]                  S_cnt_5m                      ;//
+    reg                  [03:00]                  S_data_sum                    ;//
+    reg                  [01:00]                  S_data_sample                 ;//
+    reg                  [05:00]                  S_cnt_bit                     ;//16bit-data + 1bit odd
+    reg                  [33:00]                  S_reg_dout                    ;//
+    reg                                           S_end_dly                     ;//
+
 /* ================================================================================================  */
 /*                                        Main Code                                                  */
 /* ================================================================================================  */
 
 /* ================================================================================================  */
-/*                                  1. Input data storage                                            */
+/*                              1. Input data edge detection                                         */
 /* ================================================================================================  */
 
     always @(posedge I_sys_clk or negedge I_rst_n)begin
         if(!I_rst_n)begin
-            S_en_code_d1 <= 1'b0;
+            S_data_d <= 2'b00;
+        end
+    else begin
+            S_data_d <= {S_data_d[0],I_CCDL_IN};
+        end
+    end
+    assign          S_pos_data                    = S_data_d == 2'b01;
+    assign          S_neg_data                    = S_data_d == 2'b10;
+
+/* ================================================================================================  */
+/*                   2. Frame header judgment and sampling enable signal                             */
+/* ================================================================================================  */
+
+    always @(posedge I_sys_clk or negedge I_rst_n)begin
+        if(!I_rst_n)begin
+            S_work_enable <= 1'b0;
+        end
+        else if(S_cnt_bit == 6'd16 && (S_cnt_5m == (C_MAX_5M_CNT  - 1)))begin
+            S_work_enable <= 1'b0;
+        end
+          else if(S_frame_front_high == 1'b1 && (S_cnt_frame == 6'd7))begin// (30 / 5) * 1.5 - 2
+            S_work_enable <= 1'b1;
+        end
+    end
+    always @(posedge I_sys_clk or negedge I_rst_n)begin
+        if(!I_rst_n)begin
+            S_frame_front_high <= 1'b0;
+        end
+        else if(S_work_enable == 1'b0 && S_pos_data == 1'b1)begin   //帧头高电平使能
+            S_frame_front_high <= 1'b1;
+        end
+        else if(S_frame_front_high == 1'b1 && (S_cnt_frame == 6'd7))begin
+            S_frame_front_high <= 1'b0;
+        end
+    end
+    always @(posedge I_sys_clk or negedge I_rst_n)begin
+        if(!I_rst_n)begin
+            S_cnt_frame <= 6'd0;
+        end
+        else if(S_frame_front_high == 1'b1)begin
+            S_cnt_frame <= S_cnt_frame + 6'd1;
         end
         else begin
-            S_en_code_d1 <= I_en_code;
+            S_cnt_frame <= 6'd0;
         end
     end
-    always @(posedge I_sys_clk or negedge I_rst_n)begin
-        if(!I_rst_n)begin
-            S_data_d1 <= 16'd0;
-        end
-        else if(I_en_code == 1'b1)begin
-            S_data_d1 <= I_data;
-        end
-    end
-    
-/* ================================================================================================  */
-/*                             2. Input data odd verification                                        */
-/* ================================================================================================  */
-
-    assign          S_odd_bit                     = ~(^S_data_d1);
 
 /* ================================================================================================  */
-/*                         3. [Data+Verification] Manchester Code                                    */
+/*                                 3. N-fold sampling data                                           */
 /* ================================================================================================  */
 
-    assign          S_data_tmp                    = {S_odd_bit,S_data_d1};
     always @(posedge I_sys_clk or negedge I_rst_n)begin
         if(!I_rst_n)begin
-            S_cnt_loop = 5'd0;
-            S_Man_data = 34'd0;
+            S_cnt_5m <= 4'd0;
         end
-        else if(I_en_code == 1'b1)begin
-            S_cnt_loop = 5'd0;
-        end
-        else if(S_en_code_d1 == 1'b1)begin
-            for (S_cnt_loop = 0; S_cnt_loop < 5'd17; S_cnt_loop = S_cnt_loop + 5'd1) begin//data msb + check bit
-                if(S_cnt_loop == 16)begin                           //check bit
-                    if(S_data_tmp[S_cnt_loop] == 1'b1)begin
-                        S_Man_data[(S_cnt_loop << 1)]      = 1'b1;
-                        S_Man_data[(S_cnt_loop << 1) + 1]  = 1'b0;
-                    end
-                    else begin
-                        S_Man_data[(S_cnt_loop << 1)]      = 1'b0;
-                        S_Man_data[(S_cnt_loop << 1) + 1]  = 1'b1;
-                    end
-                end
-                else begin                                          //data MSB
-                    if(S_data_tmp[S_cnt_loop] == 1'b1)begin
-                        S_Man_data[31-(S_cnt_loop << 1) - 1] = 1'b1;
-                        S_Man_data[31-(S_cnt_loop << 1)]     = 1'b0;
-                    end
-                    else begin
-                        S_Man_data[31-(S_cnt_loop << 1) - 1] = 1'b0;
-                        S_Man_data[31-(S_cnt_loop << 1)]     = 1'b1;
-                    end
-                end
-            end
-        end
-    end
-    
-/* ================================================================================================  */
-/*                               4. Manchester Coded Output                                          */
-/* ================================================================================================  */
-
-    //1. 16 frequency division, data transmission rate of 5Mbps
-    always @(posedge I_sys_clk or negedge I_rst_n)begin
-        if(!I_rst_n)begin
-            S_add_cnt_5m <= 1'b0;
-        end
-        else if(I_en_code == 1'b1)begin
-            S_add_cnt_5m <= 1'b1;
-        end
-        else if(O_en_done == 1'b1)begin
-            S_add_cnt_5m <= 1'b0;
-        end
-    end
-    always @(posedge I_sys_clk or negedge I_rst_n)begin
-        if(!I_rst_n)begin
-            S_cnt_5m <= 'd0;
-        end
-        else if(S_add_cnt_5m)begin
-            if(S_end_cnt_5m)begin
-                S_cnt_5m <= 'd0;
+        else if(S_work_enable == 1'b1)begin
+            if(S_cnt_5m == ((C_MAX_5M_CNT - 1)))begin
+                S_cnt_5m <= 4'd0;
             end
             else begin
-                S_cnt_5m <= S_cnt_5m + 1'b1;
+                S_cnt_5m <= S_cnt_5m + 4'd1;
             end
         end
         else begin
-            S_cnt_5m <= 'd0;
+            S_cnt_5m <= 4'd0;
         end
     end
-    assign          S_end_cnt_5m                  = S_add_cnt_5m && (S_cnt_5m == ((C_MAX_5M_CNT>>1)-1));//1��5M�����ڰ�����0-1 / 1-0��
-
-    // 2. Send sequence counter
     always @(posedge I_sys_clk or negedge I_rst_n)begin
         if(!I_rst_n)begin
-            S_cnt_seq <= 'd0;
+            S_data_sum <= 4'd0;
         end
-        else if(O_en_done)begin
-            S_cnt_seq <= 'd0;
+        else if(S_work_enable == 1'b1)begin                         //采集数据期间
+            if(S_cnt_5m == ((C_MAX_5M_CNT - 2)))begin               //每16bit 采集结束
+                S_data_sum <= 4'd0;
+            end
+            else if((S_data_d[0] == 1'b1) && (S_cnt_5m < 3))begin
+                S_data_sum <= S_data_sum + 4'd1;
+            end
         end
-        else if(S_add_cnt_seq)begin
-            if(S_end_cnt_seq)begin
-                S_cnt_seq <= 'd0;
+        else begin
+            S_data_sum <= 4'd0;
+        end
+    end
+    always @(posedge I_sys_clk or negedge I_rst_n)begin
+        if(!I_rst_n)begin
+            S_data_sample <= 2'b0;
+        end
+        else if(S_work_enable == 1'b0 && S_pos_data == 1'b1)begin   //每帧开始，清零
+            S_data_sample <= 2'b0;
+        end
+        else if(S_work_enable == 1'b1 && (S_cnt_5m == ((C_MAX_5M_CNT - 2))))begin
+            if(S_data_sum >= C_JUDGE_ONE)begin                      //2025-03-03 22:50:26  阈值
+                S_data_sample <= 2'b10;
+            end
+            else if(S_data_sum <= C_JUDGE_ZERO)begin
+                S_data_sample <= 2'b01;
+            end
+        end
+    end
+    always @(posedge I_sys_clk or negedge I_rst_n)begin
+        if(!I_rst_n)begin
+            S_cnt_bit <= 6'd0;
+        end
+        else if(S_work_enable == 1'b0)begin
+            S_cnt_bit <= 6'd0;
+        end
+        else if(S_work_enable == 1'b1 && (S_cnt_5m == ((C_MAX_5M_CNT - 1))))begin
+            if(S_cnt_bit == 6'd16)begin
+                S_cnt_bit <= 6'd0;
             end
             else begin
-                S_cnt_seq <= S_cnt_seq + 1'b1;
+                S_cnt_bit <= S_cnt_bit + 6'd1;
             end
-        end
-        else begin
-            S_cnt_seq <= S_cnt_seq;
-        end
-    end
-    assign          S_add_cnt_seq                 = S_end_cnt_5m;
-    assign          S_end_cnt_seq                 = S_add_cnt_seq && S_cnt_seq == C_MAX_SEQ_CNT - 1;
-    // 3. Data output
-    always @(posedge I_sys_clk or negedge I_rst_n)begin
-        if(!I_rst_n)begin
-            O_encode <= 1'b0;                                       //����Ϊ��
-        end
-        else if(S_cnt_seq < 6'd3)begin                              //֡ͷ�͵�ƽ
-            O_encode <= 1'b0;
-        end
-        else if(S_cnt_seq >= 3 && S_cnt_seq < 6'd6)begin            //֡ͷ�ߵ�ƽ
-            O_encode <= 1'b1;
-        end
-        else begin                                                  //data MSB + check
-            O_encode <= S_Man_data[S_cnt_seq-6];
-        end
-    end
-    always @(posedge I_sys_clk or negedge I_rst_n)begin
-        if(!I_rst_n)begin
-            O_en_done <= 1'b0;
-        end
-        else begin
-            O_en_done <= S_end_cnt_seq;
         end
     end
 
-endmodule                                                           //Manchester_encode END
+/* ================================================================================================  */
+/*                               4. Update data to register                                          */
+/* ================================================================================================  */
+
+    always @(posedge I_sys_clk or negedge I_rst_n)begin
+        if(!I_rst_n)begin
+            S_reg_dout <= 32'd0;
+        end
+        else if(S_cnt_5m == C_MAX_5M_CNT - 1)begin
+            // S_reg_dout <= {S_data_sample,S_reg_dout[33:02]};
+            S_reg_dout[(S_cnt_bit << 1)+1-:2] <= {S_data_sample[0],S_data_sample[1]};
+        end
+    end
+
+/* ================================================================================================  */
+/*                                     5. Data output                                                */
+/* ================================================================================================  */
+
+    always @(posedge I_sys_clk or negedge I_rst_n)begin
+        if(!I_rst_n)begin
+            S_end_dly <= 1'b0;
+        end
+        else begin
+            S_end_dly <= ((S_cnt_bit == 6'd16) && (S_cnt_5m == C_MAX_5M_CNT-1));
+        end
+    end
+        
+    always @(posedge I_sys_clk or negedge I_rst_n)begin
+        if(!I_rst_n)begin
+            O_sample_data <= 32'd0;
+        end
+        else if(S_end_dly)begin
+            O_sample_data <= S_reg_dout[31:00];
+        end
+    end
+    always @(posedge I_sys_clk or negedge I_rst_n)begin
+        if(!I_rst_n)begin
+            O_sample_valid <= 1'b0;
+            end
+        else if(S_end_dly)begin
+            O_sample_valid <= 1'b1;
+        end
+        else begin
+            O_sample_valid <= 1'b0;
+        end
+    end
+
+endmodule                                                           //sample END

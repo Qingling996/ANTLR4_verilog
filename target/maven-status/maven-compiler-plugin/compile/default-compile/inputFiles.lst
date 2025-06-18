@@ -1,7 +1,9 @@
+C:\Users\AdolphWang\antlr4_verilog\src\main\java\verilogparser\AstNode.java
+C:\Users\AdolphWang\antlr4_verilog\target\generated-sources\antlr4\verilogparser\VerilogParserBaseListener.java
+C:\Users\AdolphWang\antlr4_verilog\target\generated-sources\antlr4\verilogparser\VerilogParserVisitor.java
 C:\Users\AdolphWang\antlr4_verilog\src\main\java\verilogparser\Main.java
-C:\Users\AdolphWang\antlr4_verilog\target\generated-sources\antlr4\verilog\VerilogLexer.java
-C:\Users\AdolphWang\antlr4_verilog\target\generated-sources\antlr4\verilog\VerilogParser.java
-C:\Users\AdolphWang\antlr4_verilog\target\generated-sources\antlr4\verilog\VerilogParserListener.java
-C:\Users\AdolphWang\antlr4_verilog\target\generated-sources\antlr4\verilog\VerilogParserBaseListener.java
-C:\Users\AdolphWang\antlr4_verilog\target\generated-sources\antlr4\verilog\VerilogParserBaseVisitor.java
-C:\Users\AdolphWang\antlr4_verilog\target\generated-sources\antlr4\verilog\VerilogParserVisitor.java
+C:\Users\AdolphWang\antlr4_verilog\target\generated-sources\antlr4\verilogparser\VerilogParser.java
+C:\Users\AdolphWang\antlr4_verilog\target\generated-sources\antlr4\verilogparser\VerilogParserBaseVisitor.java
+C:\Users\AdolphWang\antlr4_verilog\src\main\java\verilogparser\AstBuilder.java
+C:\Users\AdolphWang\antlr4_verilog\target\generated-sources\antlr4\verilogparser\VerilogLexer.java
+C:\Users\AdolphWang\antlr4_verilog\target\generated-sources\antlr4\verilogparser\VerilogParserListener.java

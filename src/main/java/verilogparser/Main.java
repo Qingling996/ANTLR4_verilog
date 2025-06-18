@@ -1,137 +1,102 @@
 package verilogparser;
 
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTree;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+
 import verilog.VerilogLexer;
 import verilog.VerilogParser;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
-// import org.antlr.v4.gui.TreeViewer;
-
-// // 新增的GUI相关导入
-// import javax.swing.*;
-// import java.awt.*; // 包含GraphicsEnvironment
-// import java.util.Arrays; // 新增的Arrays导入
-
-// import javax.imageio.ImageIO;
-// import java.awt.image.BufferedImage;
-// import java.io.File;
-import java.io.FileWriter;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
 
-        // 修改为从文件读取（参数传入路径）
-        if (args.length == 0) {
-            System.err.println("Usage: java Main  <file-or-directory>");
-            return;
+    // ==================================================================================
+    // 改进 1：添加一个自定义的错误监听器
+    // 当ANTLR遇到语法错误时，这个类会抛出异常，从而立即终止程序，而不是继续错误地解析。
+    // ==================================================================================
+    public static class ThrowingErrorListener extends BaseErrorListener {
+        public static final ThrowingErrorListener INSTANCE = new ThrowingErrorListener();
+
+        @Override
+        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
+                throws ParseCancellationException {
+            // 抛出异常，附带清晰的错误信息
+            throw new ParseCancellationException("line " + line + ":" + charPositionInLine + " " + msg);
         }
-        String filePath = args[0];
-        CharStream input = CharStreams.fromFileName(filePath); // 关键修改
-        
-        // 解析管道
-        VerilogLexer lexer = new VerilogLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        VerilogParser parser = new VerilogParser(tokens);
-
-        // 获取语法树
-        ParseTree tree = parser.source_text();
-        System.out.println(tree.toStringTree(parser));
-
-        // 保存为JSON
-        saveASTJson(parser, tree, "Verilog_AST.json");
-
-        // 图形化展示
-        // if (!GraphicsEnvironment.isHeadless()) {
-        //     showAST(parser, tree);
-        //     saveASTImage(parser, tree, "Verilog_AST.png"); // 保存为 ast.png
-        // }
     }
 
-    // private static void showAST(VerilogParser parser, ParseTree tree) {
-    //     JFrame frame = new JFrame("Verilog_AST");
-    //     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-    //     TreeViewer viewer = new TreeViewer(
-    //         Arrays.asList(parser.getRuleNames()), 
-    //         tree
-    //     );
-        
-    //     viewer.setScale(1.5);
-    //     JScrollPane scrollPane = new JScrollPane(viewer);
-    //     frame.add(scrollPane);
-        
-    //     frame.setSize(800, 600);
-    //     frame.setVisible(true);
-    // }
-
-    // 保存AST为图片
-    // private static void saveASTImage(VerilogParser parser, ParseTree tree, String filename) throws Exception {
-    //     // 关键：设置连线颜色
-    //     UIManager.put("Tree.hash", Color.BLACK);
-
-    //     TreeViewer viewer = new TreeViewer(
-    //         Arrays.asList(parser.getRuleNames()),
-    //         tree
-    //     );
-    //     viewer.setScale(1.5f);
-    //     viewer.setOpaque(true);
-    //     viewer.setBackground(Color.WHITE);
-    //     viewer.setSize(viewer.getPreferredSize());
-
-    //     BufferedImage image = new BufferedImage(
-    //         viewer.getWidth(), viewer.getHeight(),
-    //         BufferedImage.TYPE_INT_ARGB
-    //     );
-    //     Graphics2D g2 = image.createGraphics();
-
-    //     // 填充白色背景
-    //     g2.setColor(Color.WHITE);
-    //     g2.fillRect(0, 0, image.getWidth(), image.getHeight());
-
-    //     viewer.paint(g2);
-    //     g2.dispose();
-
-    //     ImageIO.write(image, "png", new File(filename));
-    //     System.out.println("AST图片已保存到: " + filename);
-    // }
-
-    // ParseTree转JSON字符串
-    private static String parseTreeToJson(ParseTree tree, Parser parser) {
-        StringBuilder sb = new StringBuilder();
-        parseTreeToJsonHelper(tree, parser, sb, 0);
-        return sb.toString();
-    }
-
-    private static void parseTreeToJsonHelper(ParseTree tree, Parser parser, StringBuilder sb, int indent) {
-        String nodeName;
-        if (tree instanceof ParserRuleContext) {
-            nodeName = parser.getRuleNames()[((ParserRuleContext) tree).getRuleIndex()];
-        } else {
-            nodeName = tree.getText().replace("\"", "\\\"");
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            System.err.println("Usage: java -jar <jar-file> <input-verilog-file> <output-json-file>");
+            System.exit(1);
         }
-        String indentStr = "  ".repeat(indent);
-        sb.append(indentStr).append("{\n");
-        sb.append(indentStr).append("  \"name\": \"").append(nodeName).append("\"");
-        int childCount = tree.getChildCount();
-        if (childCount > 0) {
-            sb.append(",\n").append(indentStr).append("  \"children\": [\n");
-            for (int i = 0; i < childCount; i++) {
-                parseTreeToJsonHelper(tree.getChild(i), parser, sb, indent + 2);
-                if (i != childCount - 1) sb.append(",\n");
+        String inputFilePath = args[0];
+        String outputFilePath = args[1];
+
+        try {
+            // ==================================================================================
+            // 关键诊断代码：打印程序实际读取到的文件内容
+            // ==================================================================================
+            String content = new String(Files.readAllBytes(Paths.get(inputFilePath)));
+            System.out.println("----------- FILE CONTENT AS SEEN BY JAVA -----------");
+            System.out.println("Reading from file: " + Paths.get(inputFilePath).toAbsolutePath()); // 打印绝对路径，防止混淆
+            System.out.println(content);
+            System.out.println("----------------------------------------------------");
+            // ==================================================================================
+
+
+            CharStream stream = CharStreams.fromString(content);
+            VerilogLexer lexer = new VerilogLexer(stream);
+            CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+            
+            // 注意：下面的 tokenStream.fill() 不是必需的，因为Parser会自动消费token。
+            // 除非你在parser运行前就要操作所有token，否则可以注释掉。
+            // tokenStream.fill(); 
+            List<Token> allTokens = tokenStream.getTokens();
+
+            VerilogParser parser = new VerilogParser(tokenStream);
+
+            // ==================================================================================
+            // 改进 2：应用我们的自定义错误监听器
+            // ==================================================================================
+            parser.removeErrorListeners(); // 移除默认的控制台输出监听器
+            parser.addErrorListener(ThrowingErrorListener.INSTANCE); // 添加我们自己的、会抛出异常的监听器
+
+            ParseTree tree = parser.source_text(); // 现在，如果解析出错，这一行会直接抛出异常
+
+            // 如果程序能运行到这里，说明解析完全成功，没有任何语法错误
+            System.out.println("Parsing completed successfully. Generating AST...");
+
+            AstBuilder astBuilder = new AstBuilder(allTokens);
+            AstNode rootNode = astBuilder.visit(tree);
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String jsonOutput = gson.toJson(rootNode);
+
+            try (FileWriter writer = new FileWriter(outputFilePath)) {
+                writer.write(jsonOutput);
             }
-            sb.append("\n").append(indentStr).append("  ]\n");
-            sb.append(indentStr).append("}");
-        } else {
-            sb.append(", \"value\": \"").append(tree.getText().replace("\"", "\\\"")).append("\"");
-            sb.append("\n").append(indentStr).append("}");
-        }
-    }
 
-    // 保存AST为JSON文件
-    private static void saveASTJson(VerilogParser parser, ParseTree tree, String filename) throws Exception {
-        String json = parseTreeToJson(tree, parser);
-        try (FileWriter fw = new FileWriter(filename)) {
-            fw.write(json);
+            System.out.println("AST successfully generated at: " + outputFilePath);
+
+        } catch (IOException e) {
+            // 处理文件读写错误
+            System.err.println("Error reading or writing file: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        } catch (ParseCancellationException e) {
+            // ==================================================================================
+            // 改进 3：捕获我们的自定义解析异常
+            // ==================================================================================
+            System.err.println("Parsing failed!");
+            System.err.println("Error: " + e.getMessage()); // 打印我们格式化过的、清晰的错误信息
+            System.exit(1);
         }
-        System.out.println("AST已保存为JSON: " + filename);
     }
 }
